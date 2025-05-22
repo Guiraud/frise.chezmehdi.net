@@ -1,52 +1,53 @@
 <template>
-  <div class="spreadsheet-input-container">
-    <div class="input-group">
-      <label for="spreadsheet-url">URL du tableur</label>
+  <div class="spreadsheet-input">
+    <form @submit.prevent="handleSubmit" class="input-group">
       <input
-        id="spreadsheet-url"
-        v-model="url"
         type="text"
-        placeholder="https://docs.google.com/spreadsheets/..."
-        @input="validateUrl"
+        v-model="url"
+        placeholder="Collez l'URL de votre tableur"
+        class="form-control"
       />
-      <button @click="validateUrl" :disabled="isLoading">Valider</button>
-    </div>
+      <button type="submit" class="btn btn-primary" :disabled="loading">
+        <span v-if="loading">Chargement...</span>
+        <span v-else>Valider</span>
+      </button>
+    </form>
     <div v-if="error" class="error-message">{{ error }}</div>
-    <div v-if="isValid" class="success-message">URL valide !</div>
   </div>
 </template>
 
 <script>
 export default {
+  name: 'SpreadsheetInput',
+  emits: ['submit'],
   data() {
     return {
       url: '',
-      error: '',
-      isValid: false,
-      isLoading: false
+      loading: false,
+      error: ''
     }
   },
   methods: {
-    async validateUrl() {
-      if (this.isLoading) return;
+    async handleSubmit() {
+      console.log('Bouton cliqué !'); // Ajoutez cette ligne
+      if (!this.url) {
+        this.error = 'Veuillez entrer une URL';
+        return;
+      }
       
+      this.loading = true;
       this.error = '';
-      this.isValid = false;
-      this.isLoading = true;
-
+      
+      console.log('URL soumise :', this.url); // Ajoutez cette ligne
+      
       try {
-        // Validation basique de l'URL
-        const url = new URL(this.url);
-        if (!url.hostname.includes('docs.google.com') && !url.hostname.includes('framacalc.org')) {
-          throw new Error('L\'URL doit être un lien vers Google Sheets ou Framacalc');
-        }
-
-        // TODO: Validation plus approfondie avec requête API
-        this.isValid = true;
+        // Émettre l'événement avec l'URL
+        this.$emit('submit', this.url);
       } catch (err) {
-        this.error = err.message;
+        console.error('Erreur lors du traitement :', err); // Ajoutez cette ligne
+        this.error = 'Une erreur est survenue lors du chargement des données';
       } finally {
-        this.isLoading = false;
+        this.loading = false;
       }
     }
   }
@@ -54,52 +55,46 @@ export default {
 </script>
 
 <style scoped>
-.spreadsheet-input-container {
-  max-width: 600px;
-  margin: 2rem auto;
-  padding: 1rem;
+.spreadsheet-input {
+  margin: 20px 0;
 }
 
 .input-group {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 10px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-label {
-  flex: 0 0 120px;
-  align-self: center;
-}
-
-input {
+.form-control {
   flex: 1;
-  padding: 0.5rem;
+  padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  font-size: 16px;
 }
 
-button {
-  padding: 0.5rem 1rem;
-  background-color: #42b983;
-  color: white;
+.btn {
+  padding: 10px 20px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  font-size: 16px;
 }
 
-button:disabled {
-  background-color: #ccc;
+.btn-primary {
+  background-color: #42b983;
+  color: white;
+}
+
+.btn:disabled {
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
 .error-message {
-  color: #ff4444;
-  margin-top: 0.5rem;
-}
-
-.success-message {
-  color: #42b983;
-  margin-top: 0.5rem;
+  color: #e74c3c;
+  margin-top: 10px;
+  text-align: center;
 }
 </style>

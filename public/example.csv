@@ -1,0 +1,9 @@
+type,date,fin,titre,description,contexte,acteurs,lieu,source,liens,image,couleur,icone
+event,2025-01-15,,Lancement de la version bêta,,Projet de développement,Équipe tech,Siège social,https://example.com,https://example.com/beta,https://via.placeholder.com/150,blue,rocket
+period,2025-02-01,2025-03-15,Campagne de tests,,Phase de test,Équipe QA,En ligne,https://example.com,https://example.com/tests,https://via.placeholder.com/150,green,flask
+event,2025-03-20,,Conférence majeure,Présentation des résultats,Événement,Directeur,Centre de conférences,https://example.com,https://example.com/conference,https://via.placeholder.com/150,red,bullhorn
+period,2025-04-01,2025-06-30,Amélioration des performances,,Développement,Équipe tech,Siège social,https://example.com,https://example.com/performance,https://via.placeholder.com/150,purple,tachometer-alt
+event,2025-05-10,,Publication de l'étude,,Recherche,Équipe scientifique,En ligne,https://example.com,https://example.com/etude,https://via.placeholder.com/150,orange,file-alt
+event,2025-06-15,,Atelier utilisateurs,Session de feedback,Utilisateurs,Équipe produit,Siège social,https://example.com,https://example.com/atelier,https://via.placeholder.com/150,teal,users
+period,2025-07-01,2025-08-31,Vacances d'été,,Période creuse,Équipe,Monde,https://example.com,https://example.com/vacances,https://via.placeholder.com/150,gray,umbrella-beach
+event,2025-09-10,,Lancement officiel,Version 1.0,Événement,Équipe,Siège social,https://example.com,https://example.com/lancement,https://via.placeholder.com/150,blue,rocket
