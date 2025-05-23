@@ -357,6 +357,10 @@ export const sortTimelineData = (data, order = 'asc') => {
   });
 };
 
+// Exporter les fonctions individuellement pour l'importation nommée
+export { fetchSheetData, filterTimelineData, sortTimelineData };
+
+// Exporter aussi par défaut pour la rétrocompatibilité
 export default {
   fetchSheetData,
   filterTimelineData,
