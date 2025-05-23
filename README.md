@@ -13,12 +13,14 @@ Application de frise chronologique développée avec Vue 3, Vite et TypeScript.
 ### Installation
 
 1. Cloner le dépôt :
+
    ```bash
    git clone https://github.com/votre-utilisateur/frise.chezmehdi.net.git
    cd frise.chezmehdi.net
    ```
 
 2. Installer les dépendances :
+
    ```bash
    npm install
    # ou

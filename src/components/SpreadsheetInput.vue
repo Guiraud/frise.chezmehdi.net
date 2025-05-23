@@ -4,7 +4,7 @@
       <input
         type="text"
         v-model="url"
-        placeholder="Collez l'URL de votre tableur"
+        placeholder="Collez l'URL de votre tableur Google Sheets ou CSV"
         class="form-control"
       />
       <button type="submit" class="btn btn-primary" :disabled="loading">
@@ -17,39 +17,58 @@
 </template>
 
 <script>
+import { ref, watch } from 'vue';
+
 export default {
   name: 'SpreadsheetInput',
   emits: ['submit'],
-  data() {
-    return {
-      url: '',
-      loading: false,
-      error: ''
+  props: {
+    initialUrl: {
+      type: String,
+      default: ''
     }
   },
-  methods: {
-    async handleSubmit() {
-      console.log('Bouton cliqué !'); // Ajoutez cette ligne
-      if (!this.url) {
-        this.error = 'Veuillez entrer une URL';
+  setup(props, { emit }) {
+    const url = ref('');
+    const loading = ref(false);
+    const error = ref('');
+
+    // Mettre à jour l'URL si initialUrl change
+    watch(() => props.initialUrl, (newVal) => {
+      if (newVal) {
+        url.value = newVal;
+      }
+    }, { immediate: true });
+
+    const handleSubmit = async () => {
+      console.log('Bouton cliqué !');
+      if (!url.value) {
+        error.value = 'Veuillez entrer une URL';
         return;
       }
       
-      this.loading = true;
-      this.error = '';
+      loading.value = true;
+      error.value = '';
       
-      console.log('URL soumise :', this.url); // Ajoutez cette ligne
+      console.log('URL soumise :', url.value);
       
       try {
         // Émettre l'événement avec l'URL
-        this.$emit('submit', this.url);
+        emit('submit', url.value);
       } catch (err) {
-        console.error('Erreur lors du traitement :', err); // Ajoutez cette ligne
-        this.error = 'Une erreur est survenue lors du chargement des données';
+        console.error('Erreur lors du traitement :', err);
+        error.value = 'Une erreur est survenue lors du chargement des données : ' + (err.message || 'Erreur inconnue');
       } finally {
-        this.loading = false;
+        loading.value = false;
       }
-    }
+    };
+
+    return {
+      url,
+      loading,
+      error,
+      handleSubmit
+    };
   }
 }
 </script>
