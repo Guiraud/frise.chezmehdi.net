@@ -72,53 +72,55 @@ export default {
       }
     };
 
+    // Gestion de la soumission du formulaire de tableur
     const handleSpreadsheetSubmit = async (url) => {
-      console.log('URL reçue :', url);
+      console.log('Tentative de chargement avec l\'URL :', url);
       loading.value = true;
       error.value = null;
-      debugInfo.value = null;
       
       try {
         // Mettre à jour l'URL avec le paramètre
         const params = new URLSearchParams();
         params.set('url', encodeURIComponent(url));
-        window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.pushState({}, '', newUrl);
         
-        // Formater l'URL pour Google Sheets si nécessaire
-        const formattedUrl = formatGoogleSheetsUrl(url);
-        console.log('URL formatée :', formattedUrl);
+        // Charger les données
+        console.log('Appel à fetchSheetData...');
+        const data = await fetchSheetData(url);
         
-        const response = await fetch(formattedUrl, {
-          method: 'GET',
-          mode: 'cors',
-          headers: {
-            'Content-Type': 'text/csv',
-          },
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Erreur HTTP: ${response.status} - ${response.statusText}`);
+        if (!data || !Array.isArray(data) || data.length === 0) {
+          throw new Error('Aucune donnée valide n\'a été retournée');
         }
         
-        const csvData = await response.text();
-        debugInfo.value = {
-          url: url,
-          formattedUrl: formattedUrl,
-          status: response.status,
-          headers: Object.fromEntries(response.headers.entries()),
-          dataPreview: csvData.substring(0, 500) + (csvData.length > 500 ? '...' : '')
-        };
+        console.log('Données chargées avec succès :', data);
         
-        console.log('Données CSV :', csvData);
+        // Mettre à jour les données de la timeline
+        timelineData.value = data;
         
+        // Afficher une notification de succès
+        showNotification('Données chargées avec succès', 'success');
       } catch (err) {
-        console.error('Erreur :', err);
-        error.value = `Erreur lors du chargement : ${err.message}`;
-        debugInfo.value = {
-          error: err.toString(),
-          stack: err.stack,
-          url: url
-        };
+        console.error('Erreur lors du chargement des données :', err);
+        
+        // Message d'erreur plus convivial
+        let errorMessage = 'Une erreur est survenue lors du chargement des données';
+        
+        if (err.message.includes('Failed to fetch')) {
+          errorMessage = 'Impossible de se connecter au serveur. Vérifiez votre connexion Internet.';
+        } else if (err.message.includes('404')) {
+          errorMessage = 'Fichier non trouvé. Vérifiez que l\'URL est correcte.';
+        } else if (err.message.includes('CSV')) {
+          errorMessage = 'Erreur de format CSV. Vérifiez que le fichier est correctement formaté.';
+        } else {
+          errorMessage = `Erreur : ${err.message}`;
+        }
+        
+        error.value = errorMessage;
+        showNotification(errorMessage, 'error');
+        
+        // Réinitialiser les données en cas d'erreur
+        timelineData.value = [];
       } finally {
         loading.value = false;
       }

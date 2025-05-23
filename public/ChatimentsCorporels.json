@@ -1,0 +1,104 @@
+{
+    "TimelineEvents": [
+      {
+        "description": "Circulaire nationale interdisant explicitement tout châtiment corporel à l'école élémentaire. Le maître s'interdit tout comportement, geste ou parole qui traduirait indifférence ou mépris à l'égard de l'élève",
+        "title": "Circulaire interdisant les châtiments corporels à l'école",
+        "date": "1991/06/06 12:00:00"
+      },
+      {
+        "description": "Arrêt de la Cour de cassation reconnaissant qu'une claque administrée par une gardienne à un enfant de 6 ans n'excédait pas 'les limites du droit de correction inhérent à la mission de surveillance'",
+        "title": "Arrêt Cour de cassation - Maintien du droit de correction",
+        "date": "2003/06/17 12:00:00"
+      },
+      {
+        "description": "La cour d'appel de Douai relaxe un prévenu en affirmant que 'les violences reconnues [...] sont légères, rares et n'ont pas dépassé l'exercice du simple droit de correction'",
+        "title": "Arrêt Cour d'appel Douai - Droit de correction",
+        "date": "2008/10/29 12:00:00"
+      },
+      {
+        "description": "Circulaire n° 2011-111 réglementant les sanctions dans l'enseignement secondaire, excluant explicitement les châtiments corporels",
+        "title": "Circulaire sanctions enseignement secondaire",
+        "date": "2011/08/01 12:00:00"
+      },
+      {
+        "description": "Condamnation de la France par le Comité européen des droits sociaux pour non-conformité à la Charte sociale européenne concernant l'interdiction des châtiments corporels",
+        "title": "Condamnation France - Comité européen droits sociaux",
+        "date": "2014/03/01 12:00:00"
+      },
+      {
+        "description": "Le ministère de l'Éducation nationale publie le règlement type des écoles primaires précisant que 'tout châtiment corporel ou traitement humiliant est strictement interdit'",
+        "title": "Règlement type écoles primaires",
+        "date": "2014/07/09 12:00:00"
+      },
+      {
+        "description": "Arrêt de la Cour de cassation (n° 13-86.371) maintenant le principe du 'droit de correction' des parents malgré les pressions internationales",
+        "title": "Arrêt Cour de cassation - Maintien droit correction",
+        "date": "2014/10/29 12:00:00"
+      },
+      {
+        "description": "Question sénatoriale de Mme Annick Billon sur la suite donnée par la France à la campagne du Conseil de l'Europe concernant l'abolition totale des châtiments corporels",
+        "title": "Question sénatoriale abolition châtiments corporels",
+        "date": "2015/02/26 12:00:00"
+      },
+      {
+        "description": "Quatrième rappel du Comité des droits de l'enfant de l'ONU à la France concernant son devoir d'interdire explicitement les châtiments corporels, y compris au sein de la famille",
+        "title": "4e rappel ONU - Comité droits de l'enfant",
+        "date": "2016/02/01 12:00:00"
+      },
+      {
+        "description": "Arrêt de la Cour de cassation condamnant une enseignante pour violences sur élèves (gifles, cheveux tirés, scotch sur la bouche, enfermement dans un placard)",
+        "title": "Condamnation enseignante - Cour de cassation",
+        "date": "2017/11/07 12:00:00"
+      },
+      {
+        "description": "Dépôt par Maud Petit et plusieurs députés de la proposition de loi relative à l'interdiction des violences éducatives ordinaires à l'Assemblée nationale",
+        "title": "Dépôt proposition de loi VEO",
+        "date": "2018/10/17 12:00:00"
+      },
+      {
+        "description": "Adoption par l'Assemblée nationale de la proposition de loi relative à l'interdiction des violences éducatives ordinaires",
+        "title": "Adoption Assemblée nationale - Loi VEO",
+        "date": "2018/11/29 12:00:00"
+      },
+      {
+        "description": "Adoption définitive par le Sénat de la proposition de loi relative à l'interdiction des violences éducatives ordinaires",
+        "title": "Adoption définitive Sénat - Loi VEO",
+        "date": "2019/07/02 12:00:00"
+      },
+      {
+        "description": "Promulgation de la loi n° 2019-721 relative à l'interdiction des violences éducatives ordinaires. Article 371-1 du Code civil modifié : 'L'autorité parentale s'exerce sans violences physiques ou psychologiques'. La France devient le 56e pays au monde à interdire les châtiments corporels",
+        "title": "Loi interdisant les violences éducatives ordinaires",
+        "date": "2019/07/10 12:00:00"
+      }
+    ],
+    "TimelinePeriods": [
+      {
+        "description": "Période de persistance des châtiments corporels malgré l'interdiction théorique à l'école depuis 1887. Le 'droit de correction' coutumier reste pleinement reconnu par la jurisprudence pour les parents. Types de gestes tolérés : fessées, gifles légères, corrections 'éducatives' proportionnées",
+        "title": "Persistance malgré interdictions formelles",
+        "start": "1950/01/01 12:00:00",
+        "end": "1980/12/31 12:00:00",
+        "color": "#d32f2f"
+      },
+      {
+        "description": "Disparition progressive effective des châtiments corporels dans les établissements scolaires. Évolution des mentalités mais maintien du 'droit de correction' familial avec durcissement progressif des critères jurisprudentiels",
+        "title": "Évolution progressive des pratiques",
+        "start": "1980/01/01 12:00:00",
+        "end": "2000/12/31 12:00:00",
+        "color": "#ff9800"
+      },
+      {
+        "description": "Montée de la pression internationale (CEDH, Conseil de l'Europe, ONU) pour l'interdiction explicite des châtiments corporels. Multiplication des condamnations de la France. Projets législatifs non aboutis. Évolution jurisprudentielle restrictive mais maintien du principe du 'droit de correction'",
+        "title": "Pression internationale croissante",
+        "start": "2000/01/01 12:00:00",
+        "end": "2019/07/10 12:00:00",
+        "color": "#ff5722"
+      },
+      {
+        "description": "Application de la loi du 10 juillet 2019 interdisant toutes violences physiques et psychologiques dans l'exercice de l'autorité parentale. Fin théorique du 'droit de correction' coutumier. Développement des politiques de soutien à la parentalité et formation des professionnels",
+        "title": "Interdiction légale et application",
+        "start": "2019/07/10 12:00:00",
+        "end": "2020/12/31 12:00:00",
+        "color": "#4caf50"
+      }
+    ]
+  }

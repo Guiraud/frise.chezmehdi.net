@@ -41,23 +41,34 @@ export default {
     }, { immediate: true });
 
     const handleSubmit = async () => {
-      console.log('Bouton cliqué !');
+      console.log('Soumission du formulaire avec l\'URL :', url.value);
+      
+      // Validation de l'URL
       if (!url.value) {
-        error.value = 'Veuillez entrer une URL';
+        error.value = 'Veuillez entrer une URL ou un nom de fichier';
+        return;
+      }
+      
+      // Nettoyer l'URL
+      const cleanUrl = url.value.trim();
+      
+      // Validation du format
+      if (!/^(https?:\/\/|\/|\w+\.csv$)/i.test(cleanUrl)) {
+        error.value = 'Format non valide. Utilisez une URL complète ou un nom de fichier CSV';
         return;
       }
       
       loading.value = true;
       error.value = '';
       
-      console.log('URL soumise :', url.value);
-      
       try {
-        // Émettre l'événement avec l'URL
-        emit('submit', url.value);
+        console.log('Émission de l\'événement submit avec l\'URL :', cleanUrl);
+        await emit('submit', cleanUrl);
       } catch (err) {
-        console.error('Erreur lors du traitement :', err);
-        error.value = 'Une erreur est survenue lors du chargement des données : ' + (err.message || 'Erreur inconnue');
+        console.error('Erreur lors de la soumission :', err);
+        error.value = err.message || 'Une erreur est survenue lors du chargement des données';
+        // Émettre un événement d'erreur
+        emit('error', error.value);
       } finally {
         loading.value = false;
       }

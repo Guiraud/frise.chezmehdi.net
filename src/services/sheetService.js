@@ -207,44 +207,114 @@ const parseCSVData = (csvData) => {
 };
 
 /**
- * Récupère les données d'une feuille de calcul à partir de son URL
- * @param {string} url - L'URL de la feuille de calcul
+ * Charge un fichier CSV local
+ * @param {string} filename - Le nom du fichier CSV dans le répertoire public
+ * @returns {Promise<Array<Object>>} Les données du fichier CSV
+ */
+/**
+ * Charge un fichier CSV local depuis le répertoire public
+ * @param {string} filename - Le nom du fichier CSV à charger
+ * @returns {Promise<Array<Object>>} Les données parsées du fichier CSV
+ */
+const fetchLocalCSV = async (filename) => {
+  try {
+    console.log('Tentative de chargement du fichier local:', filename);
+    
+    // Nettoyer le nom de fichier pour éviter les attaques par traversée de répertoire
+    const cleanFilename = filename.replace(/^[\\/]/, ''); // Supprimer uniquement le premier / ou \\
+    
+    // Construire l'URL du fichier dans le répertoire public
+    const fileUrl = `/${cleanFilename}`;
+    
+    console.log('URL du fichier nettoyé:', fileUrl);
+    
+    // Vérifier que le fichier a l'extension .csv
+    if (!fileUrl.toLowerCase().endsWith('.csv')) {
+      throw new Error('Le fichier doit avoir l\'extension .csv');
+    }
+    
+    // Récupérer le contenu du fichier
+    console.log('Requête HTTP vers:', fileUrl);
+    const response = await fetch(fileUrl, {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache'
+      }
+    });
+    
+    console.log('Réponse reçue, statut:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Erreur de réponse:', errorText);
+      throw new Error(`Erreur HTTP: ${response.status} - ${response.statusText}`);
+    }
+    
+    const csvData = await response.text();
+    console.log('Données CSV brutes reçues:', csvData.substring(0, 200) + '...');
+    
+    const parsedData = parseCSVData(csvData);
+    console.log('Données parsées:', parsedData);
+    
+    return parsedData;
+  } catch (error) {
+    console.error('Erreur lors du chargement du fichier CSV local:', error);
+    throw new Error(`Impossible de charger le fichier CSV: ${error.message}`);
+  }
+
+};
+
+/**
+ * Récupère les données d'une feuille de calcul à partir de son URL ou d'un fichier local
+ * @param {string} url - L'URL de la feuille de calcul ou le nom du fichier local
  * @param {Object} options - Options supplémentaires
  * @param {string} options.apiKey - Clé API Google (optionnelle)
  * @returns {Promise<Array<Object>>} Les données de la feuille de calcul
  */
-export const fetchSheetData = async (url, options = {}) => {
-  if (!url) {
-    throw new Error('L\'URL du tableur est requise');
-  }
+const fetchSheetData = async (url, options = {}) => {
+  console.log('fetchSheetData appelé avec URL:', url);
   
   try {
-    // Normalisation de l'URL
-    if (!url.startsWith('http')) {
-      url = `https://${url}`;
+    // Vérifier si l'URL est vide
+    if (!url) {
+      throw new Error('Aucune URL fournie');
     }
+
+    // Nettoyer l'URL
+    const cleanUrl = url.trim();
     
-    const urlObj = new URL(url);
-    
-    // Détection du type de tableur
-    if (urlObj.hostname.includes('google.com') || urlObj.hostname.includes('google.fr')) {
-      const sheetId = extractGoogleSheetId(url);
-      if (!sheetId) {
-        throw new Error('Impossible d\'extraire l\'ID de la feuille Google Sheets');
-      }
-      return await fetchGoogleSheetData(sheetId, options.apiKey);
-    } else if (urlObj.hostname.includes('framacalc.org')) {
-      const sheetId = extractFramacalcId(url);
-      if (!sheetId) {
-        throw new Error('Impossible d\'extraire l\'ID de la feuille Framacalc');
-      }
-      return await fetchFramacalcData(sheetId);
-    } else {
-      throw new Error('Type de tableur non pris en charge. Seuls Google Sheets et Framacalc sont supportés.');
+    // Vérifier si c'est un fichier CSV local
+    if (cleanUrl.toLowerCase().endsWith('.csv')) {
+      console.log('Détection d\'un fichier CSV local');
+      return await fetchLocalCSV(cleanUrl);
     }
+
+    // Vérifier si c'est une URL Google Sheets
+    const googleSheetId = extractGoogleSheetId(cleanUrl);
+    if (googleSheetId) {
+      console.log('Détection d\'une feuille Google Sheets, ID:', googleSheetId);
+      return await fetchGoogleSheetData(googleSheetId, options);
+    }
+
+    // Vérifier si c'est une URL Framacalc
+    const framacalcId = extractFramacalcId(cleanUrl);
+    if (framacalcId) {
+      console.log('Détection d\'une feuille Framacalc, ID:', framacalcId);
+      return await fetchFramacalcData(framacalcId);
+    }
+
+    // Si on arrive ici, le format n'est pas reconnu
+    const errorMsg = 'Format de feuille de calcul non reconnu. Utilisez un lien Google Sheets, Framacalc ou un fichier CSV.';
+    console.error(errorMsg, { url: cleanUrl });
+    throw new Error(errorMsg);
   } catch (error) {
-    console.error('Erreur lors de la récupération des données:', error);
-    throw new Error(`Erreur lors du chargement des données: ${error.message}`);
+    console.error('Erreur dans fetchSheetData:', {
+      error: error.message,
+      stack: error.stack,
+      url: url,
+      options: options
+    });
+    throw error; // Propage l'erreur pour qu'elle puisse être gérée par le composant appelant
   }
 };
 
