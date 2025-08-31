@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Bétharram - Chart.js</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            position: relative;
+            height: 80vh;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background-color: #36A2EB;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2691D9;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        .btn-success {
+            background-color: #4BC0C0;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #3da8a8;
+        }
+        .view-selector {
+            display: flex;
+            gap: 5px;
+            background-color: #f1f3f4;
+            border-radius: 8px;
+            padding: 4px;
+        }
+        .view-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .view-btn.active {
+            background-color: #36A2EB;
+            color: white;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+        .info-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #36A2EB;
+        }
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        .filter-panel {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .filter-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .filter-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+        .filter-item label {
+            font-size: 14px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Chronologie de l'Affaire Bétharram</h1>
+        <p>Timeline interactive avec Chart.js - Événements de 1995 à 2001</p>
+    </div>
+
+    <div class="controls">
+        <div class="view-selector">
+            <button class="view-btn active" onclick="showTimelineView()">Timeline</button>
+            <button class="view-btn" onclick="showScatterView()">Nuage de points</button>
+            <button class="view-btn" onclick="showBarView()">Histogramme</button>
+        </div>
+        <button class="btn btn-primary" onclick="toggleAnimation()">Animation On/Off</button>
+        <button class="btn btn-success" onclick="exportChart()">Exporter PNG</button>
+        <button class="btn btn-secondary" onclick="resetZoom()">Reset Zoom</button>
+    </div>
+
+    <div class="filter-panel">
+        <h4>Filtres</h4>
+        <div class="filter-group">
+            <div class="filter-item">
+                <input type="checkbox" id="events-filter" checked onchange="updateFilters()">
+                <label for="events-filter">Événements ponctuels</label>
+            </div>
+            <div class="filter-item">
+                <input type="checkbox" id="periods-filter" checked onchange="updateFilters()">
+                <label for="periods-filter">Périodes</label>
+            </div>
+            <div class="filter-item">
+                <input type="checkbox" id="media-filter" checked onchange="updateFilters()">
+                <label for="media-filter">Couverture médiatique</label>
+            </div>
+            <div class="filter-item">
+                <input type="checkbox" id="judicial-filter" checked onchange="updateFilters()">
+                <label for="judicial-filter">Procédures judiciaires</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="timeline-chart"></canvas>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #FF6384;"></div>
+            <span>Événements majeurs</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #36A2EB;"></div>
+            <span>Procédures judiciaires</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #FFCE56;"></div>
+            <span>Couverture médiatique</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #4BC0C0;"></div>
+            <span>Contrôle judiciaire</span>
+        </div>
+    </div>
+
+    <div class="info-panel">
+        <h3>Informations sur la Timeline</h3>
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="visible-events">26</div>
+                <div class="stat-label">Événements visibles</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="total-duration">6</div>
+                <div class="stat-label">Années couvertes</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="peak-intensity">1996</div>
+                <div class="stat-label">Année la plus active</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="chart-type">Timeline</div>
+                <div class="stat-label">Vue actuelle</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Données du JSON avec catégories ajoutées
+        const eventsData = [
+            { title: "La gifle fatale", date: "1995-01-31", category: "violence" },
+            { title: "Le péron provoqué par un encadrant-élève", date: "1995-12-05", category: "violence" },
+            { title: "Violence sur la professeure de mathématique", date: "1995-04-02", category: "violence" },
+            { title: "Plainte pour violences", date: "1996-01-29", category: "judicial" },
+            { title: "Révélation publique de l'affaire", date: "1996-04-10", category: "media" },
+            { title: "Nouveaux témoignages - Bayrou ne s'exprime pas", date: "1996-04-11", category: "media" },
+            { title: "Vague de soutien pour Bétharram", date: "1996-04-12", category: "media" },
+            { title: "Réaction de la direction", date: "1996-04-13", category: "institutional" },
+            { title: "Condamnation du surveillant", date: "1996-06-12", category: "judicial" },
+            { title: "Mise en examen du père Carricart", date: "1998-05-26", category: "judicial" },
+            { title: "Publication de l'affaire Carricart", date: "1998-05-29", category: "media" },
+            { title: "Stupeur à Bétharram", date: "1998-05-30", category: "media" },
+            { title: "Demande de remise en liberté", date: "1998-06-06", category: "judicial" },
+            { title: "Remise en liberté sous contrôle", date: "1998-06-10", category: "judicial" },
+            { title: "Confrontation judiciaire", date: "1999-07-06", category: "judicial" },
+            { title: "Départ pour Rome", date: "1999-07-15", category: "judicial" },
+            { title: "Disparition du père Carricart", date: "2000-01-14", category: "event" },
+            { title: "Découverte du corps dans le Tibre", date: "2000-02-04", category: "event" },
+            { title: "Obsèques du père Carricart", date: "2000-02-10", category: "event" },
+            { title: "Courrier d'Alain Esquerre", date: "2000-07-18", category: "media" },
+            { title: "Annonce de l'exhumation", date: "2000-10-06", category: "judicial" },
+            { title: "Exhumation du corps", date: "2000-11-10", category: "judicial" },
+            { title: "Affaire du religieux de Mauléon", date: "2000-11-13", category: "judicial" },
+            { title: "Position de l'évêque sur la pédophilie", date: "2000-11-13", category: "institutional" },
+            { title: "Confirmation ADN", date: "2000-12-02", category: "judicial" },
+            { title: "Non-lieu prononcé", date: "2001-03-30", category: "judicial" }
+        ];
+
+        const periodsData = [
+            { title: "Couverture affaire de la gifle", start: "1996-04-10", end: "1996-06-12", color: "#FF5722" },
+            { title: "Couverture affaire Carricart", start: "1998-05-26", end: "2001-03-30", color: "#9C27B0" },
+            { title: "Procédure judiciaire - gifle", start: "1996-01-29", end: "1996-06-12", color: "#795548" },
+            { title: "Procédure judiciaire - Carricart", start: "1998-05-26", end: "2001-03-30", color: "#607D8B" },
+            { title: "Contrôle judiciaire de Carricart", start: "1998-06-10", end: "2000-01-14", color: "#4CAF50" },
+            { title: "Vérifications post-mortem", start: "2000-02-04", end: "2001-03-30", color: "#607D8B" }
+        ];
+
+        let currentChart = null;
+        let animationEnabled = true;
+        let currentView = 'timeline';
+
+        const colorMap = {
+            'violence': '#FF6384',
+            'judicial': '#36A2EB',
+            'media': '#FFCE56',
+            'institutional': '#4BC0C0',
+            'event': '#9966FF'
+        };
+
+        // Configuration de base Chart.js
+        const baseConfig = {
+            type: 'line',
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Chronologie de l\'Affaire Bétharram',
+                        font: { size: 16, weight: 'bold' }
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                const point = context[0];
+                                return point.dataset.data[point.dataIndex].title || point.label;
+                            },
+                            label: function(context) {
+                                const dataPoint = context.dataset.data[context.dataIndex];
+                                return `Date: ${moment(dataPoint.x).format('DD/MM/YYYY')}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            displayFormats: {
+                                month: 'MMM yyyy',
+                                year: 'yyyy'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Chronologie'
+                        }
+                    },
+                    y: {
+                        display: false,
+                        min: 0,
+                        max: 10
+                    }
+                },
+                elements: {
+                    point: {
+                        radius: 6,
+                        hoverRadius: 8
+                    }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeInOutQuart'
+                }
+            }
+        };
+
+        // Fonction pour convertir les données
+        function convertDataForChartJS(view) {
+            const datasets = [];
+            
+            if (view === 'timeline' || view === 'scatter') {
+                // Grouper par catégorie
+                const eventsByCategory = {};
+                eventsData.forEach(event => {
+                    const category = event.category || 'event';
+                    if (!eventsByCategory[category]) {
+                        eventsByCategory[category] = [];
+                    }
+                    eventsByCategory[category].push({
+                        x: moment(event.date).toDate(),
+                        y: Math.random() * 8 + 1,
+                        title: event.title
+                    });
+                });
+
+                // Créer datasets par catégorie
+                Object.keys(eventsByCategory).forEach(category => {
+                    datasets.push({
+                        label: `${category}`,
+                        data: eventsByCategory[category],
+                        backgroundColor: colorMap[category] || '#999999',
+                        borderColor: colorMap[category] || '#999999',
+                        showLine: view === 'timeline',
+                        tension: 0.3,
+                        fill: false
+                    });
+                });
+
+                // Ajouter les périodes
+                periodsData.forEach((period, index) => {
+                    datasets.push({
+                        label: period.title,
+                        data: [
+                            { x: moment(period.start).toDate(), y: 9 - index * 0.5 },
+                            { x: moment(period.end).toDate(), y: 9 - index * 0.5 }
+                        ],
+                        backgroundColor: period.color,
+                        borderColor: period.color,
+                        borderWidth: 4,
+                        pointRadius: 0,
+                        showLine: true,
+                        tension: 0,
+                        fill: false
+                    });
+                });
+            } else if (view === 'bar') {
+                // Vue histogramme par année
+                const eventsByYear = {};
+                eventsData.forEach(event => {
+                    const year = moment(event.date).year();
+                    eventsByYear[year] = (eventsByYear[year] || 0) + 1;
+                });
+
+                const years = Object.keys(eventsByYear).sort();
+                const counts = years.map(year => eventsByYear[year]);
+
+                datasets.push({
+                    label: 'Nombre d\'événements par année',
+                    data: years.map((year, index) => ({
+                        x: new Date(year, 0, 1),
+                        y: counts[index]
+                    })),
+                    backgroundColor: '#36A2EB',
+                    borderColor: '#36A2EB'
+                });
+            }
+
+            return datasets;
+        }
+
+        // Fonction pour mettre à jour le graphique
+        function updateChart(view = 'timeline') {
+            currentView = view;
+            
+            const config = {
+                ...baseConfig,
+                data: { datasets: convertDataForChartJS(view) }
+            };
+
+            if (view === 'scatter') {
+                config.type = 'scatter';
+                config.options.scales.y.display = true;
+                config.options.scales.y.title = { display: true, text: 'Répartition' };
+            } else if (view === 'bar') {
+                config.type = 'bar';
+                config.options.scales.y.display = true;
+                config.options.scales.y.title = { display: true, text: 'Nombre d\'événements' };
+                config.options.scales.y.min = 0;
+                config.options.scales.y.max = undefined;
+            }
+
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            const ctx = document.getElementById('timeline-chart').getContext('2d');
+            currentChart = new Chart(ctx, config);
+
+            updateStats();
+            updateActiveButton(view);
+        }
+
+        // Fonctions de vue
+        function showTimelineView() { updateChart('timeline'); }
+        function showScatterView() { updateChart('scatter'); }
+        function showBarView() { updateChart('bar'); }
+
+        // Fonctions utilitaires
+        function toggleAnimation() {
+            animationEnabled = !animationEnabled;
+            if (currentChart) {
+                currentChart.options.animation.duration = animationEnabled ? 1000 : 0;
+                currentChart.update();
+            }
+        }
+
+        function resetZoom() {
+            if (currentChart) {
+                currentChart.resetZoom();
+            }
+        }
+
+        function exportChart() {
+            if (currentChart) {
+                const link = document.createElement('a');
+                link.download = 'timeline-betharram-chartjs.png';
+                link.href = currentChart.toBase64Image();
+                link.click();
+            }
+        }
+
+        function updateFilters() {
+            updateChart(currentView);
+        }
+
+        function updateStats() {
+            document.getElementById('visible-events').textContent = eventsData.length;
+            document.getElementById('total-duration').textContent = '6';
+            document.getElementById('peak-intensity').textContent = '1996';
+            document.getElementById('chart-type').textContent = currentView.charAt(0).toUpperCase() + currentView.slice(1);
+        }
+
+        function updateActiveButton(view) {
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+            const viewMap = { 'timeline': 0, 'scatter': 1, 'bar': 2 };
+            document.querySelectorAll('.view-btn')[viewMap[view]].classList.add('active');
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            showScatterChart();
+        });
+    </script>
+</body>
+</html>aded', function() {
+            updateChart('timeline');
+        });
+    </script>
+</body>
+</html>

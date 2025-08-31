@@ -1,0 +1,74 @@
+{
+  "type": "project",
+  "name": "TimelineAgileProject",
+  "description": "Gestion de projet agile avec sprints et backlog",
+  "domain": "software_development",
+  "period": "2024-2025",
+  "features": [
+    "sprint_tracking",
+    "burndown_charts",
+    "team_collaboration",
+    "task_dependencies",
+    "real_time_updates",
+    "integration_tools"
+  ],
+  "data_source": "jira_api",
+  "library": "vis-timeline",
+  "options": {
+    "responsive": true,
+    "interactive": true,
+    "animation": true,
+    "grouping": true,
+    "clustering": false,
+    "real_time": true,
+    "collaboration": true,
+    "export_formats": ["png", "svg", "excel", "jira_export"]
+  },
+  "styles": {
+    "theme": "agile",
+    "colors": ["#FF6347", "#FF7F50", "#FFA07A", "#FFF8DC"],
+    "background": "linear-gradient(to bottom, #fff8dc, #ffffff)",
+    "status_colors": {
+      "todo": "#6c757d",
+      "in_progress": "#007bff", 
+      "review": "#ffc107",
+      "done": "#28a745",
+      "blocked": "#dc3545"
+    }
+  },
+  "data_fields": [
+    "start_date",
+    "end_date",
+    "task",
+    "assignee",
+    "status",
+    "priority",
+    "sprint",
+    "story_points",
+    "dependencies"
+  ],
+  "expected_volume": "large",
+  "target_audience": "development_team",
+  "languages": ["fr", "en"],
+  "agile_features": {
+    "sprint_planning": true,
+    "burndown_tracking": true,
+    "velocity_charts": true,
+    "retrospective_notes": true,
+    "epic_management": true
+  },
+  "integrations": {
+    "jira": true,
+    "trello": true,
+    "github": true,
+    "gitlab": true,
+    "slack": true,
+    "teams": true
+  },
+  "collaboration": {
+    "real_time_editing": true,
+    "comments": true,
+    "notifications": true,
+    "team_presence": true
+  }
+}

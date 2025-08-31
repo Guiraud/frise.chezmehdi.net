@@ -1,12 +1,12 @@
 # Frise Chronologique - ChezMehdi.net
 
-Application de frise chronologique développée avec Vue 3, Vite et TypeScript.
+Application de frise chronologique développée avec Vue 3 et Vite qui génère des timelines interactives à partir de données de tableurs (Google Sheets, Framacalc, CSV).
 
 ## 🚀 Mise en route
 
 ### Prérequis
 
-- Node.js (version 16 ou supérieure)
+- Node.js (version 18 ou supérieure)  
 - npm ou yarn
 - Un compte Cloudflare (pour le déploiement)
 
@@ -15,7 +15,7 @@ Application de frise chronologique développée avec Vue 3, Vite et TypeScript.
 1. Cloner le dépôt :
 
    ```bash
-   git clone https://github.com/votre-utilisateur/frise.chezmehdi.net.git
+   git clone git@gitlab.com:journalism-with-ai/frise.chezmehdi.net.git
    cd frise.chezmehdi.net
    ```
 
@@ -81,12 +81,55 @@ Les fichiers compilés seront disponibles dans le dossier `dist`.
 
 ## 🛠 Technologies utilisées
 
-- Vue 3 (Composition API)
-- Vite
-- TypeScript
-- Pinia (gestion d'état)
-- Vue Router
-- Tailwind CSS (pour le styling)
+- **Vue 3** (Composition API)
+- **Vite** (Build tool et dev server)
+- **vis-timeline** (Visualisation de timeline)
+- **Vue Router** (Routing)
+
+## 🔧 Développement et CI/CD
+
+### Pipeline GitLab CI
+
+Le projet utilise un pipeline GitLab CI/CD complet avec 4 étapes :
+
+1. **Install** - Installation des dépendances avec cache
+2. **Quality** - Vérifications qualité (linting, tests, type checking)
+3. **Build** - Construction pour production et preview
+4. **Deploy** - Déploiement manuel vers Cloudflare Pages
+
+### Variables d'environnement GitLab
+
+Configurez ces variables dans GitLab (Settings → CI/CD → Variables) :
+
+- `CLOUDFLARE_API_TOKEN` - Token API Cloudflare avec permissions Pages
+- `CLOUDFLARE_ACCOUNT_ID` - ID de compte Cloudflare
+- `CLOUDFLARE_PROJECT_NAME` - Nom du projet Pages
+
+### Environnements
+
+- **Production** : `main` → https://frise.chezmehdi.net
+- **Staging** : `develop` → https://develop.frise.chezmehdi.net
+- **Preview** : Merge requests (déclenchement manuel)
+
+### Test local de la pipeline
+
+```bash
+# Test du build
+npm run build
+
+# Test du serveur de dev
+npm run dev
+
+# Test des scripts de qualité (placeholders)
+npm run lint
+npm run test
+```
+
+### Documentation
+
+- `CLAUDE.md` - Guide pour Claude Code
+- `DEPLOYMENT.md` - Guide de déploiement détaillé
+- `wrangler.toml` - Configuration Cloudflare Pages
 
 ## 📝 Licence
 

@@ -324,7 +324,7 @@ const fetchSheetData = async (url, options = {}) => {
  * @param {string} query - La requête de recherche
  * @returns {Array<Object>} Les données filtrées
  */
-export const filterTimelineData = (data, query) => {
+const filterTimelineData = (data, query) => {
   if (!query) return data;
   
   const searchTerm = query.toLowerCase();
@@ -344,7 +344,7 @@ export const filterTimelineData = (data, query) => {
  * @param {string} order - L'ordre de tri ('asc' ou 'desc')
  * @returns {Array<Object>} Les données triées
  */
-export const sortTimelineData = (data, order = 'asc') => {
+const sortTimelineData = (data, order = 'asc') => {
   return [...data].sort((a, b) => {
     const dateA = new Date(a.start);
     const dateB = new Date(b.start);

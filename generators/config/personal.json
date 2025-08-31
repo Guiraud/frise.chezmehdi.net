@@ -1,0 +1,68 @@
+{
+  "type": "personal",
+  "name": "TimelineCareerPath",
+  "description": "Parcours professionnel et formation",
+  "domain": "career_development",
+  "period": "2010-2024",
+  "features": [
+    "storytelling",
+    "media_rich",
+    "skill_progression",
+    "achievement_highlights",
+    "export",
+    "portfolio_integration"
+  ],
+  "data_source": "linkedin_api",
+  "library": "timelinejs",
+  "options": {
+    "responsive": true,
+    "interactive": true,
+    "animation": true,
+    "storytelling_mode": true,
+    "media_support": true,
+    "skill_visualization": true,
+    "export_formats": ["png", "svg", "pdf", "portfolio"]
+  },
+  "styles": {
+    "theme": "elegant",
+    "colors": ["#9370DB", "#BA55D3", "#DDA0DD", "#F8F8FF"],
+    "background": "linear-gradient(to bottom, #f8f8ff, #ffffff)",
+    "typography": {
+      "primary": "Playfair Display",
+      "secondary": "Source Sans Pro"
+    }
+  },
+  "data_fields": [
+    "date",
+    "event",
+    "category",
+    "description",
+    "skills_acquired",
+    "achievements",
+    "media_attachments",
+    "testimonials",
+    "certifications"
+  ],
+  "expected_volume": "small",
+  "target_audience": "recruiters",
+  "languages": ["fr", "en"],
+  "media_types": {
+    "images": true,
+    "videos": true,
+    "documents": true,
+    "certificates": true,
+    "portfolio_items": true
+  },
+  "skill_tracking": {
+    "technical_skills": true,
+    "soft_skills": true,
+    "certifications": true,
+    "languages": true,
+    "progression_visualization": true
+  },
+  "privacy": {
+    "public_view": true,
+    "private_notes": true,
+    "selective_sharing": true
+  }
+}

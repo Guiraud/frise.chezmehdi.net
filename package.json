@@ -6,7 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "echo 'Linting not configured - install ESLint for Vue.js'",
+    "lint:fix": "echo 'Lint fix not configured - install ESLint for Vue.js'",
+    "test": "echo 'Tests not configured - consider adding Vitest or Jest'",
+    "test:unit": "echo 'Unit tests not configured'",
+    "type-check": "echo 'Type checking not configured - consider adding TypeScript'"
   },
   "dependencies": {
     "vis-data": "^7.1.9",

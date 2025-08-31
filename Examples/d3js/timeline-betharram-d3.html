@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Bétharram - D3.js</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .timeline-container {
+            margin: 20px 0;
+        }
+        
+        .axis {
+            font-size: 12px;
+        }
+        
+        .event-dot {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .event-dot:hover {
+            stroke-width: 3;
+        }
+        
+        .period-bar {
+            opacity: 0.7;
+            cursor: pointer;
+        }
+        
+        .period-bar:hover {
+            opacity: 0.9;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 300px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .legend {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+        }
+        
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Timeline de l'Affaire Bétharram</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            Chronologie des événements (1995-2001) - Visualisation D3.js
+        </p>
+        
+        <div class="controls">
+            <button class="btn" onclick="zoomToFit()">Vue d'ensemble</button>
+            <button class="btn" onclick="zoomToEvents()">Événements seulement</button>
+            <button class="btn" onclick="zoomToPeriods()">Périodes seulement</button>
+        </div>
+        
+        <div class="timeline-container">
+            <svg id="timeline"></svg>
+        </div>
+        
+        <div class="legend" id="legend"></div>
+    </div>
+
+    <script>
+        // Données de la timeline
+        const timelineData = {
+            "repuPyreneesEvents": [
+                {
+                    "description": "La gifle de janvier 1995 qui a fait perdre définitivement 40% de ses capacités auditives à l'élève (fait rapporté en 1996)",
+                    "title": "La gifle fatale",
+                    "date": "1995-01-31 12:00:00"
+                },
+                {
+                    "description": "Le péron",
+                    "title": "Le péron provoqué par un encadrant-élève",
+                    "date": "1995-12-05 21:00:00"
+                },
+                {
+                    "description": "Le 2 avril 1996, vers 15 heures, un élève de 3ème [texte masqué] est sorti en courant d'une salle de cours (pendant l'intercours) et a sauté sur un de ses camarades en s'appuyant sur son épaule. En retombant, son coude a heurté Madame [texte masqué], professeur, qui passait près d'eux (voir document en annexes).",
+                    "title": "Violence sur la professeure de mathématique",
+                    "date": "1995-04-02 10:00:00"
+                },
+                {
+                    "description": "Dépôt d'une plainte par le père d'un élève pensionnaire pour violences volontaires et traitements inhumains et dégradants à Bétharram",
+                    "title": "Plainte pour violences",
+                    "date": "1996-01-29 12:00:00"
+                },
+                {
+                    "description": "Publication en Une de l'article 'Bétharram : plaintes pour violences au collège' révélant l'affaire publiquement",
+                    "title": "Révélation publique de l'affaire",
+                    "date": "1996-04-10 12:00:00"
+                },
+                {
+                    "description": "Nouveaux témoignages et révélations sur les violences à Bétharram. François Bayrou ne souhaite pas s'exprimer publiquement tant que l'enquête est en cours",
+                    "title": "Nouveaux témoignages - Bayrou ne s'exprime pas",
+                    "date": "1996-04-11 12:00:00"
+                },
+                {
+                    "description": "Publication de l'article sur la 'vague de soutien' en faveur de l'institution Notre-Dame de Bétharram aux quatre coins du Sud-Ouest",
+                    "title": "Vague de soutien pour Bétharram",
+                    "date": "1996-04-12 12:00:00"
+                },
+                {
+                    "description": "Réaction officielle de la direction du collège Notre-Dame de Bétharram aux accusations après plusieurs jours de silence",
+                    "title": "Réaction de la direction",
+                    "date": "1996-04-13 12:00:00"
+                },
+                {
+                    "description": "Condamnation du surveillant auteur de la gifle à une amende de 5000 francs avec sursis pour violence sur mineur de 15 ans",
+                    "title": "Condamnation du surveillant",
+                    "date": "1996-06-12 12:00:00"
+                },
+                {
+                    "description": "Mise en examen et incarcération du père Pierre Carricart, ancien directeur de Bétharram, accusé de viol par un ancien élève âgé de 22 ans (10 ans au moment des faits)",
+                    "title": "Mise en examen du père Carricart",
+                    "date": "1998-05-26 12:00:00"
+                },
+                {
+                    "description": "Publication en Une (second rang après le Grand Prix de Pau) de l'arrestation du père Carricart, avec prudence médiatique",
+                    "title": "Publication de l'affaire Carricart",
+                    "date": "1998-05-29 12:00:00"
+                },
+                {
+                    "description": "Article sur 'la stupeur' à Bétharram suite à l'affaire Carricart, climat de réserve et prudence imposé par la gravité des accusations",
+                    "title": "Stupeur à Bétharram",
+                    "date": "1998-05-30 12:00:00"
+                },
+                {
+                    "description": "Dépôt d'une demande de remise en liberté par la défense du père Carricart",
+                    "title": "Demande de remise en liberté",
+                    "date": "1998-06-06 12:00:00"
+                },
+                {
+                    "description": "Remise en liberté du père Carricart sous contrôle judiciaire par la chambre d'accusation de la cour d'appel de Pau",
+                    "title": "Remise en liberté sous contrôle",
+                    "date": "1998-06-10 12:00:00"
+                },
+                {
+                    "description": "Confrontation de trois heures dans une atmosphère tendue et parfois houleuse entre le père Carricart et son accusateur chez le juge d'instruction Christian Mirande",
+                    "title": "Confrontation judiciaire",
+                    "date": "1999-07-06 12:00:00"
+                },
+                {
+                    "description": "Levée partielle du contrôle judiciaire, le père Carricart part à Rome où l'attend le poste d'intendant général de la Congrégation des Pères du Sacré Coeur de Jésus de Bétharram",
+                    "title": "Départ pour Rome",
+                    "date": "1999-07-15 12:00:00"
+                },
+                {
+                    "description": "Disparition du père Pierre Carricart à Rome, alors qu'il devait être à nouveau mis en examen suite à la plainte d'un ancien interne",
+                    "title": "Disparition du père Carricart",
+                    "date": "2000-01-14 12:00:00"
+                },
+                {
+                    "description": "Découverte du corps du père Carricart dans les eaux du Tibre à Rome, information 'accrochée' à la Une mais pas en titre principal",
+                    "title": "Découverte du corps dans le Tibre",
+                    "date": "2000-02-04 12:00:00"
+                },
+                {
+                    "description": "Obsèques du père Carricart célébrées au Calvaire de Bétharram devant une foule très nombreuse selon des témoins",
+                    "title": "Obsèques du père Carricart",
+                    "date": "2000-02-10 12:00:00"
+                },
+                {
+                    "description": "Publication du courrier d'Alain Esquerre dans la rubrique 'Regards', ancien élève exprimant sa solidarité aux victimes (futur porte-parole du collectif)",
+                    "title": "Courrier d'Alain Esquerre",
+                    "date": "2000-07-18 12:00:00"
+                },
+                {
+                    "description": "Annonce de l'exhumation possible du corps du père Carricart pour prélèvements ADN suite aux doutes sur la taille mentionnée dans le rapport d'autopsie",
+                    "title": "Annonce de l'exhumation",
+                    "date": "2000-10-06 12:00:00"
+                },
+                {
+                    "description": "Exhumation du corps du père Carricart à partir de 8h30, accès au lieu interdit par les gendarmes, découverte d'un chapelet dans les mains",
+                    "title": "Exhumation du corps",
+                    "date": "2000-11-10 08:30:00"
+                },
+                {
+                    "description": "Mise en examen et incarcération d'un religieux octogénaire de Mauléon pour agressions sexuelles et viols sur mineurs (affaire en Une)",
+                    "title": "Affaire du religieux de Mauléon",
+                    "date": "2000-11-13 12:00:00"
+                },
+                {
+                    "description": "Déclarations de Mgr Pierre Molères, évêque de Bayonne, sur sa ligne de conduite face à la pédophilie : 'On ne peut pas couvrir de tels comportements'",
+                    "title": "Position de l'évêque sur la pédophilie",
+                    "date": "2000-11-13 12:00:00"
+                },
+                {
+                    "description": "Confirmation par analyses ADN que le corps enterré à Bétharram est bien celui de Pierre Carricart",
+                    "title": "Confirmation ADN",
+                    "date": "2000-12-02 12:00:00"
+                },
+                {
+                    "description": "Prononcé du non-lieu par le juge Mirande, extinction des poursuites suite au décès confirmé de Pierre Carricart",
+                    "title": "Non-lieu prononcé",
+                    "date": "2001-03-30 12:00:00"
+                }
+            ],
+            "repuPyreneesPeriods": [
+                {
+                    "description": "Période de couverture médiatique intensive de l'affaire de la gifle à Bétharram par La République des Pyrénées, de la révélation publique à la condamnation",
+                    "title": "Couverture affaire de la gifle",
+                    "start": "1996-04-10 12:00:00",
+                    "end": "1996-06-12 12:00:00",
+                    "color": "#FF5722"
+                },
+                {
+                    "description": "Période de traitement médiatique de l'affaire Carricart par La République des Pyrénées, depuis la mise en examen jusqu'au non-lieu",
+                    "title": "Couverture affaire Carricart",
+                    "start": "1998-05-26 12:00:00",
+                    "end": "2001-03-30 12:00:00",
+                    "color": "#9C27B0"
+                },
+                {
+                    "description": "Période d'enquête et procédure judiciaire concernant l'affaire de la gifle, du dépôt de plainte à la condamnation",
+                    "title": "Procédure judiciaire - gifle",
+                    "start": "1996-01-29 12:00:00",
+                    "end": "1996-06-12 12:00:00",
+                    "color": "#795548"
+                },
+                {
+                    "description": "Période d'enquête judiciaire sur l'affaire Carricart, de la mise en examen au non-lieu après décès",
+                    "title": "Procédure judiciaire - Carricart",
+                    "start": "1998-05-26 12:00:00",
+                    "end": "2001-03-30 12:00:00",
+                    "color": "#607D8B"
+                },
+                {
+                    "description": "Période de liberté sous contrôle judiciaire du père Carricart avant sa fuite à Rome",
+                    "title": "Contrôle judiciaire de Carricart",
+                    "start": "1998-06-10 12:00:00",
+                    "end": "2000-01-14 12:00:00",
+                    "color": "#4CAF50"
+                },
+                {
+                    "description": "Période de vérifications post-mortem : de la découverte du corps aux analyses ADN et au non-lieu",
+                    "title": "Vérifications post-mortem",
+                    "start": "2000-02-04 12:00:00",
+                    "end": "2001-03-30 12:00:00",
+                    "color": "#607D8B"
+                }
+            ]
+        };
+
+        // Configuration de la timeline
+        const margin = { top: 40, right: 50, bottom: 60, left: 50 };
+        const width = 1100 - margin.left - margin.right;
+        const height = 600 - margin.bottom - margin.top;
+        
+        // Parse dates
+        const parseDate = d3.timeParse("%Y-%m-%d %H:%M:%S");
+        const events = timelineData.repuPyreneesEvents.map(d => ({
+            ...d,
+            date: parseDate(d.date),
+            type: 'event'
+        }));
+        
+        const periods = timelineData.repuPyreneesPeriods.map(d => ({
+            ...d,
+            start: parseDate(d.start),
+            end: parseDate(d.end),
+            type: 'period'
+        }));
+
+        // Échelles
+        const allDates = [
+            ...events.map(d => d.date),
+            ...periods.map(d => d.start),
+            ...periods.map(d => d.end)
+        ];
+        
+        const xScale = d3.scaleTime()
+            .domain(d3.extent(allDates))
+            .range([0, width]);
+
+        // SVG principal
+        const svg = d3.select("#timeline")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.bottom + margin.top);
+
+        const g = svg.append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Axe temporel
+        const xAxis = d3.axisBottom(xScale)
+            .tickFormat(d3.timeFormat("%Y"))
+            .ticks(d3.timeYear.every(1));
+
+        g.append("g")
+            .attr("class", "axis")
+            .attr("transform", `translate(0,${height - 50})`)
+            .call(xAxis);
+
+        // Tooltip
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        // Zoom
+        const zoom = d3.zoom()
+            .scaleExtent([0.5, 10])
+            .on("zoom", (event) => {
+                const newXScale = event.transform.rescaleX(xScale);
+                
+                // Mettre à jour l'axe
+                g.select(".axis").call(d3.axisBottom(newXScale).tickFormat(d3.timeFormat("%Y")));
+                
+                // Mettre à jour les événements
+                g.selectAll(".event-dot")
+                    .attr("cx", d => newXScale(d.date));
+                
+                // Mettre à jour les périodes
+                g.selectAll(".period-bar")
+                    .attr("x", d => newXScale(d.start))
+                    .attr("width", d => Math.max(0, newXScale(d.end) - newXScale(d.start)));
+            });
+
+        svg.call(zoom);
+
+        // Dessiner les périodes
+        const periodHeight = 20;
+        const periodY = height - 200;
+        
+        g.selectAll(".period-bar")
+            .data(periods)
+            .enter()
+            .append("rect")
+            .attr("class", "period-bar")
+            .attr("x", d => xScale(d.start))
+            .attr("y", (d, i) => periodY - (i * (periodHeight + 5)))
+            .attr("width", d => xScale(d.end) - xScale(d.start))
+            .attr("height", periodHeight)
+            .attr("fill", d => d.color)
+            .on("mouseover", function(event, d) {
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                tooltip.html(`
+                    <strong>${d.title}</strong><br/>
+                    ${d3.timeFormat("%d/%m/%Y")(d.start)} - ${d3.timeFormat("%d/%m/%Y")(d.end)}<br/>
+                    ${d.description}
+                `)
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", function(d) {
+                tooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
+
+        // Dessiner les événements
+        const eventY = height - 300;
+        
+        g.selectAll(".event-dot")
+            .data(events)
+            .enter()
+            .append("circle")
+            .attr("class", "event-dot")
+            .attr("cx", d => xScale(d.date))
+            .attr("cy", eventY)
+            .attr("r", 6)
+            .attr("fill", "#2196F3")
+            .attr("stroke", "#1976D2")
+            .attr("stroke-width", 2)
+            .on("mouseover", function(event, d) {
+                d3.select(this).attr("r", 8);
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                tooltip.html(`
+                    <strong>${d.title}</strong><br/>
+                    ${d3.timeFormat("%d/%m/%Y")(d.date)}<br/>
+                    ${d.description}
+                `)
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", function(d) {
+                d3.select(this).attr("r", 6);
+                tooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
+
+        // Créer la légende
+        const legend = d3.select("#legend");
+        
+        // Légende pour les événements
+        const eventLegend = legend.append("div").attr("class", "legend-item");
+        eventLegend.append("div")
+            .attr("class", "legend-color")
+            .style("background-color", "#2196F3")
+            .style("border-radius", "50%");
+        eventLegend.append("span").text("Événements");
+        
+        // Légende pour les périodes
+        periods.forEach(period => {
+            const periodLegend = legend.append("div").attr("class", "legend-item");
+            periodLegend.append("div")
+                .attr("class", "legend-color")
+                .style("background-color", period.color);
+            periodLegend.append("span").text(period.title);
+        });
+
+        // Fonctions de zoom
+        function zoomToFit() {
+            svg.transition().duration(750).call(
+                zoom.transform,
+                d3.zoomIdentity
+            );
+        }
+
+        function zoomToEvents() {
+            const eventExtent = d3.extent(events, d => d.date);
+            const eventScale = d3.scaleTime()
+                .domain(eventExtent)
+                .range([0, width]);
+            
+            const k = width / (eventScale(eventExtent[1]) - eventScale(eventExtent[0]));
+            const x = -eventScale(eventExtent[0]) * k;
+            
+            svg.transition().duration(750).call(
+                zoom.transform,
+                d3.zoomIdentity.translate(x, 0).scale(k)
+            );
+        }
+
+        function zoomToPeriods() {
+            const periodExtent = [
+                d3.min(periods, d => d.start),
+                d3.max(periods, d => d.end)
+            ];
+            const periodScale = d3.scaleTime()
+                .domain(periodExtent)
+                .range([0, width]);
+            
+            const k = width / (periodScale(periodExtent[1]) - periodScale(periodExtent[0]));
+            const x = -periodScale(periodExtent[0]) * k;
+            
+            svg.transition().duration(750).call(
+                zoom.transform,
+                d3.zoomIdentity.translate(x, 0).scale(k)
+            );
+        }
+
+        // Ajouter les labels des axes
+        g.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - margin.left)
+            .attr("x", 0 - (height / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .style("font-size", "14px")
+            .text("Chronologie");
+
+        g.append("text")
+            .attr("transform", `translate(${width / 2}, ${height - 10})`)
+            .style("text-anchor", "middle")
+            .style("font-size", "14px")
+            .text("Années");
+    </script>
+</body>
+</html>

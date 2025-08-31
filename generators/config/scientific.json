@@ -1,0 +1,60 @@
+{
+  "type": "scientific",
+  "name": "TimelineQuantumPhysics",
+  "description": "Découvertes majeures en physique quantique",
+  "domain": "physics",
+  "period": "1900-2024",
+  "features": [
+    "3d_visualization",
+    "interactive",
+    "animation",
+    "zoom",
+    "mathematical_formulas",
+    "export"
+  ],
+  "data_source": "api",
+  "library": "plotlyjs",
+  "options": {
+    "responsive": true,
+    "interactive": true,
+    "animation": true,
+    "3d": true,
+    "scientific_notation": true,
+    "formula_rendering": true,
+    "export_formats": ["png", "svg", "html", "pdf"]
+  },
+  "styles": {
+    "theme": "scientific",
+    "colors": ["#4169E1", "#00BFFF", "#87CEEB", "#E0F6FF"],
+    "background": "linear-gradient(to bottom, #f0f8ff, #ffffff)",
+    "fonts": {
+      "primary": "KaTeX_Main",
+      "mathematical": "Computer Modern"
+    }
+  },
+  "data_fields": [
+    "date",
+    "discovery",
+    "scientist", 
+    "institution",
+    "field",
+    "impact_score",
+    "mathematical_description",
+    "experiment_details",
+    "references"
+  ],
+  "expected_volume": "medium",
+  "target_audience": "researchers",
+  "languages": ["en", "fr"],
+  "special_features": {
+    "latex_support": true,
+    "citation_management": true,
+    "peer_review_links": true,
+    "simulation_embedding": true
+  },
+  "accessibility": {
+    "alt_text_formulas": true,
+    "color_blind_friendly": true,
+    "screen_reader": true
+  }
+}
