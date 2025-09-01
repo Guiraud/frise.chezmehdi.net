@@ -38,6 +38,9 @@ export const parseSheetData = (rows) => {
       item.id = `item-${index + 1}`;
     }
     
+    // Store original type before normalization
+    const originalType = item.type ? item.type.trim() : '';
+    
     // Normalize types
     if (item.type) {
       item.type = item.type.trim().toLowerCase();
@@ -55,8 +58,18 @@ export const parseSheetData = (rows) => {
       item.end = new Date(item.date_début).toISOString();
     }
     
-    // Determine CSS class based on type
+    // Determine CSS class based on original type
     item.className = getEventTypeClass(item.type);
+    
+    // Store original type for reference
+    item.originalType = originalType;
+    
+    // Set vis-timeline type based on whether item has end date
+    if (item.date_fin && item.date_fin !== item.date_début) {
+      item.type = 'range'; // Item with start and end dates
+    } else {
+      item.type = 'point'; // Single point in time
+    }
     
     return item;
   }).filter(item => item.start); // Filter items without valid start date

@@ -46,14 +46,16 @@ export default defineConfig({
   },
   // Custom middleware to handle the URL parameter
   configureServer(server) {
-    return () => {
-      server.middlewares.use((req, res, next) => {
-        // Allow requests to the root with query parameters
-        if (req.url === '/' || req.url.startsWith('/?') || req.url.endsWith('.csv')) {
-          return next()
-        }
-        next()
-      })
-    }
+    server.middlewares.use((req, res, next) => {
+      const url = new URL(req.url, 'http://localhost')
+      
+      // Allow requests to the root path with any query parameters
+      if (url.pathname === '/' || url.pathname.endsWith('.csv')) {
+        return next()
+      }
+      
+      // Allow all other requests to continue normally
+      next()
+    })
   }
 })

@@ -130,12 +130,18 @@ export default {
       console.error('🚨 Error Boundary caught error:', error);
       console.error('📍 Component instance:', instance);
       console.error('ℹ️ Error info:', errorInfo);
+      console.error('📝 Full error object:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        cause: error.cause
+      });
       
       hasError.value = true;
       errorInfo.value = {
         message: error.message,
         stack: error.stack,
-        componentInfo: errorInfo
+        componentInfo: String(errorInfo)
       };
       
       // Emit error for parent handling
