@@ -23,6 +23,9 @@ export default {
     const urlState = useUrlState();
     const notifications = useNotifications();
     
+    // State for UI
+    const showInstructions = ref(true);
+    
     // Gestion de la soumission de l'URL du tableur
     const handleUrlSubmit = async (url) => {
       if (!url) return;
@@ -31,6 +34,8 @@ export default {
         urlState.updateUrlWithSpreadsheet(url);
         await timeline.loadTimelineData(url);
         notifications.showSuccess('Données chargées avec succès');
+        // Auto-collapse instructions when data loads successfully
+        showInstructions.value = false;
       } catch (err) {
         console.error('Erreur lors du chargement des données:', err);
         notifications.showError('Erreur lors du chargement des données: ' + (err.message || 'Une erreur est survenue'));
@@ -94,6 +99,11 @@ export default {
       return handleUrlSubmit(url);
     };
     
+    // Toggle instructions visibility
+    const toggleInstructions = () => {
+      showInstructions.value = !showInstructions.value;
+    };
+    
     // Chargement initial
     onMounted(() => {
       const initialUrl = urlState.loadFromUrl();
@@ -111,6 +121,10 @@ export default {
       
       // URL state
       spreadsheetUrl: urlState.spreadsheetUrl,
+      
+      // UI state
+      showInstructions,
+      toggleInstructions,
       
       // Notifications
       notification: notifications.notification,
@@ -173,13 +187,87 @@ export default {
               </button>
             </div>
           </div>
-          
-          <!-- Format attendu pour le tableur -->
-          <div class="card format-info">
-            <h2>Format du tableur</h2>
-            <p class="format-description">
-              Votre tableur doit contenir les colonnes suivantes (noms exacts) :
-            </p>
+
+          <!-- Barre de recherche -->
+          <div v-if="timelineData.length > 0" class="card search-container">
+            <div class="search-box">
+              <input 
+                v-model="searchQuery" 
+                type="text" 
+                placeholder="Rechercher dans la frise..." 
+                class="search-input"
+              >
+              <i class="icon-search"></i>
+            </div>
+            <div class="results-count">
+              {{ timelineData.length }} événement{{ timelineData.length > 1 ? 's' : '' }}
+            </div>
+          </div>
+
+          <!-- Chargement en cours -->
+          <div v-if="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Chargement des données...</p>
+          </div>
+
+          <!-- Message d'erreur -->
+          <div v-else-if="error" class="error-message">
+            <i class="icon-error"></i>
+            <p>{{ error }}</p>
+          </div>
+
+          <!-- Timeline principale -->
+          <div v-else-if="timelineData.length > 0" class="timeline-wrapper">
+            <!-- Timeline with its own error boundary -->
+            <ErrorBoundary fallback-message="Erreur lors de l'affichage de la timeline">
+              <Timeline 
+                :items="timelineData"
+                @select="handleItemSelect"
+                @rangechanged="handleRangeChange"
+                class="timeline-card timeline-prominent"
+              />
+            </ErrorBoundary>
+            
+            <!-- Légende -->
+            <div class="legend">
+              <div class="legend-item">
+                <span class="legend-color event-context"></span>
+                <span>Événement contextuel</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color event-trigger"></span>
+                <span>Événement déclencheur</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color period-context"></span>
+                <span>Période contextuelle</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color period-activity"></span>
+                <span>Période d'activité</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Instructions pliables -->
+          <div class="instructions-section">
+            <div class="instructions-header" @click="toggleInstructions">
+              <h2>
+                <span class="chevron">{{ showInstructions ? '▼' : '▶' }}</span>
+                {{ timelineData.length > 0 ? 'Instructions et aide' : 'Format et instructions' }}
+              </h2>
+              <p v-if="!showInstructions" class="instructions-summary">
+                Format des données, partage Google Sheets...
+              </p>
+            </div>
+            
+            <div v-if="showInstructions" class="instructions-content">
+              <!-- Format attendu pour le tableur -->
+              <div class="card format-info">
+                <h3>Format du tableur</h3>
+                <p class="format-description">
+                  Votre tableur doit contenir les colonnes suivantes (noms exacts) :
+                </p>
             
             <div class="format-table">
               <div class="format-row format-header">
@@ -303,76 +391,17 @@ export default {
               </div>
             </div>
             
-            <div class="sharing-alternative">
-              <h3>Alternative : Framacalc</h3>
-              <p>Vous pouvez aussi utiliser <a href="https://framacalc.org" target="_blank" rel="noopener noreferrer">Framacalc</a>, 
-              qui est public par défaut. Créez votre tableau, puis copiez l'URL de la page.</p>
-            </div>
-          </div>
-          
-          <!-- Barre de recherche -->
-          <div v-if="timelineData.length > 0" class="card search-container">
-            <div class="search-box">
-              <input 
-                v-model="searchQuery" 
-                type="text" 
-                placeholder="Rechercher dans la frise..." 
-                class="search-input"
-              >
-              <i class="icon-search"></i>
-            </div>
-            <div class="results-count">
-              {{ timelineData.length }} événement{{ timelineData.length > 1 ? 's' : '' }}
-            </div>
-          </div>
-
-          <!-- Chargement en cours -->
-          <div v-if="loading" class="loading">
-            <div class="spinner"></div>
-            <p>Chargement des données...</p>
-          </div>
-
-          <!-- Message d'erreur -->
-          <div v-else-if="error" class="error-message">
-            <i class="icon-error"></i>
-            <p>{{ error }}</p>
-          </div>
-
-          <!-- Contenu principal -->
-          <div v-else-if="timelineData.length > 0" class="timeline-wrapper">
-            <!-- Timeline with its own error boundary -->
-            <ErrorBoundary fallback-message="Erreur lors de l'affichage de la timeline">
-              <Timeline 
-                :items="timelineData"
-                @select="handleItemSelect"
-                @rangechanged="handleRangeChange"
-                class="timeline-card"
-              />
-            </ErrorBoundary>
-            
-            <!-- Légende -->
-            <div class="legend">
-              <div class="legend-item">
-                <span class="legend-color event-context"></span>
-                <span>Événement contextuel</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color event-trigger"></span>
-                <span>Événement déclencheur</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color period-context"></span>
-                <span>Période contextuelle</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color period-activity"></span>
-                <span>Période d'activité</span>
+              <div class="sharing-alternative">
+                <h3>Alternative : Framacalc</h3>
+                <p>Vous pouvez aussi utiliser <a href="https://framacalc.org" target="_blank" rel="noopener noreferrer">Framacalc</a>, 
+                qui est public par défaut. Créez votre tableau, puis copiez l'URL de la page.</p>
               </div>
             </div>
+          </div>
           </div>
           
           <!-- État vide -->
-          <div v-else class="empty-state">
+          <div v-if="!loading && !error && timelineData.length === 0" class="empty-state">
             <div class="empty-icon">
               <i class="icon-timeline"></i>
             </div>
@@ -840,6 +869,74 @@ body {
   box-shadow: var(--shadow);
   overflow: hidden;
   margin-bottom: var(--spacing-lg);
+}
+
+.timeline-prominent {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 2px solid var(--primary-color);
+  margin: var(--spacing-xl) 0;
+}
+
+/* Instructions pliables */
+.instructions-section {
+  margin-top: var(--spacing-xl);
+}
+
+.instructions-header {
+  cursor: pointer;
+  padding: var(--spacing-lg);
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  user-select: none;
+}
+
+.instructions-header:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.instructions-header h2 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--secondary-color);
+  font-size: var(--font-size-lg);
+}
+
+.instructions-header h2 .chevron {
+  font-size: 0.8em;
+  transition: transform 0.3s ease;
+  color: var(--primary-color);
+  display: inline-block;
+  width: 1.2em;
+}
+
+.instructions-summary {
+  margin: var(--spacing-xs) 0 0 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+}
+
+.instructions-content {
+  margin-top: var(--spacing-md);
+}
+
+.instructions-content .card {
+  margin-bottom: var(--spacing-md);
+}
+
+.instructions-content .card:last-child {
+  margin-bottom: 0;
+}
+
+.instructions-content h3 {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-md);
+  color: var(--secondary-color);
+  font-weight: var(--font-weight-bold);
 }
 
 /* Légende */
