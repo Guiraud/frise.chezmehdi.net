@@ -9,7 +9,7 @@ name = "frise-chezmehdi-net"
 [env.production.vars]
 NODE_ENV = "production"
 
-[env.staging]
-name = "frise-chezmehdi-net-staging"
-[env.staging.vars]
+[env.preview]
+name = "frise-chezmehdi-net-preview"
+[env.preview.vars]
 NODE_ENV = "development"
