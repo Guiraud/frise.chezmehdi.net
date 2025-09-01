@@ -222,6 +222,15 @@ export default {
             <div class="format-note">
               <strong>Note :</strong> La première ligne doit contenir les en-têtes de colonnes.
             </div>
+            
+            <div class="format-example">
+              <a href="https://docs.google.com/spreadsheets/d/1J_peuC7nbhzW8IEeH4xwNOlgEqbL4kRAumt02n2yOVg/edit?usp=sharing" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 class="btn btn-outline">
+                <i class="icon-external"></i> Voir un modèle d'exemple
+              </a>
+            </div>
           </div>
           
           <!-- Barre de recherche -->
@@ -528,6 +537,12 @@ body {
   border-radius: var(--border-radius-sm);
   font-size: var(--font-size-sm);
   border-left: 3px solid var(--primary-color);
+  margin-bottom: var(--spacing-md);
+}
+
+.format-example {
+  display: flex;
+  justify-content: center;
 }
 
 /* Barre de recherche */
