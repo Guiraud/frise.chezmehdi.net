@@ -103,6 +103,29 @@ export default {
     const toggleInstructions = () => {
       showInstructions.value = !showInstructions.value;
     };
+
+    // Reset to home page
+    const resetToHome = () => {
+      // Clear timeline data
+      timeline.timelineData.value = [];
+      timeline.error.value = null;
+      timeline.loading.value = false;
+      timeline.searchQuery.value = '';
+      
+      // Clear URL state
+      urlState.spreadsheetUrl.value = '';
+      
+      // Show instructions again
+      showInstructions.value = true;
+      
+      // Clear URL parameters
+      const url = new URL(window.location);
+      url.search = '';
+      url.hash = '';
+      window.history.pushState({}, '', url);
+      
+      notifications.showSuccess('Retour à l\'accueil');
+    };
     
     // Chargement initial
     onMounted(() => {
@@ -125,6 +148,7 @@ export default {
       // UI state
       showInstructions,
       toggleInstructions,
+      resetToHome,
       
       // Notifications
       notification: notifications.notification,
@@ -160,8 +184,17 @@ export default {
     <!-- En-tête de l'application -->
     <header class="app-header">
       <div class="container">
-        <h1>Frise Chronologique Interactive</h1>
-        <p>Générez une frise chronologique à partir de Google Sheets ou Framacalc</p>
+        <div class="header-content">
+          <div class="header-main">
+            <h1 @click="resetToHome" class="header-title clickable">
+              🏠 Frise Chronologique Interactive
+            </h1>
+            <p>Générez une frise chronologique à partir de Google Sheets ou Framacalc</p>
+          </div>
+          <button v-if="spreadsheetUrl" @click="resetToHome" class="btn btn-home">
+            🏠 Accueil
+          </button>
+        </div>
       </div>
     </header>
 
@@ -532,18 +565,58 @@ body {
   z-index: 10;
 }
 
-.app-header h1 {
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.header-main {
+  flex: 1;
+}
+
+.header-title {
   font-size: var(--font-size-xxl);
   font-weight: var(--font-weight-bold);
   margin-bottom: var(--spacing-sm);
   line-height: 1.2;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.header-title:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+.clickable {
+  cursor: pointer;
+  user-select: none;
 }
 
 .app-header p {
   font-size: var(--font-size-lg);
   opacity: 0.9;
   max-width: 800px;
-  margin: 0 auto;
+  margin: 0;
+}
+
+.btn-home {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.btn-home:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
 }
 
 /* Contenu principal */

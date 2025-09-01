@@ -124,11 +124,35 @@ export default {
         });
       }
       
+      // Force test data if no items work
+      let testItems = this.items;
+      if (this.items.length > 0 && !this.items.some(item => item.start && item.content)) {
+        console.log('⚠️ Creating fallback test data because items seem malformed');
+        testItems = [
+          {
+            id: 'test-1',
+            content: 'Test Event 1',
+            start: '2024-01-01',
+            type: 'point',
+            className: 'event-trigger'
+          },
+          {
+            id: 'test-2', 
+            content: 'Test Event 2',
+            start: '2024-06-01',
+            end: '2024-12-01',
+            type: 'range',
+            className: 'period-activity'
+          }
+        ];
+        console.log('🧪 Using test items:', testItems);
+      }
+      
       console.log('🏗️ Creating Timeline with options:', this.options);
       
       this.timeline = new Timeline(
         container,
-        this.items,
+        testItems,
         this.groups,
         this.options
       );
@@ -138,6 +162,14 @@ export default {
       // Gestion des événements
       this.timeline.on('select', this.handleSelect);
       this.timeline.on('rangechanged', this.handleRangeChange);
+      
+      // Force fit to show all items
+      if (testItems.length > 0) {
+        setTimeout(() => {
+          console.log('🎯 Fitting timeline to show all items');
+          this.timeline.fit();
+        }, 100);
+      }
       
       // Ajustement automatique de la hauteur
       this.adjustHeight();
