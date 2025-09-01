@@ -190,7 +190,27 @@ export default {
               
               <div class="format-row">
                 <div class="format-cell format-column" data-label="Colonne">type</div>
-                <div class="format-cell" data-label="Description">Type d'événement : événement_contextuel, événement_déclencheur, période_contextuelle, période_activité</div>
+                <div class="format-cell" data-label="Description">
+                  <strong>Type d'événement :</strong>
+                  <div class="type-examples">
+                    <div class="type-item">
+                      <code>événement_contextuel</code> - Événement ponctuel donnant du contexte
+                      <span class="example">Ex: "Élection présidentielle", "Signature d'un traité"</span>
+                    </div>
+                    <div class="type-item">
+                      <code>événement_déclencheur</code> - Événement ponctuel qui déclenche une action
+                      <span class="example">Ex: "Début des manifestations", "Annonce d'une réforme"</span>
+                    </div>
+                    <div class="type-item">
+                      <code>période_contextuelle</code> - Période donnant du contexte historique
+                      <span class="example">Ex: "Seconde Guerre mondiale", "Crise économique"</span>
+                    </div>
+                    <div class="type-item">
+                      <code>période_activité</code> - Période d'activité continue
+                      <span class="example">Ex: "Construction d'un bâtiment", "Campagne électorale"</span>
+                    </div>
+                  </div>
+                </div>
                 <div class="format-cell format-required" data-label="Obligatoire">✓</div>
               </div>
               
@@ -543,6 +563,37 @@ body {
 .format-example {
   display: flex;
   justify-content: center;
+}
+
+.type-examples {
+  margin-top: var(--spacing-xs);
+}
+
+.type-item {
+  margin-bottom: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: var(--border-radius-sm);
+  border-left: 2px solid var(--border-color);
+}
+
+.type-item code {
+  font-family: 'Monaco', 'Consolas', monospace;
+  background-color: rgba(66, 185, 131, 0.1);
+  color: var(--primary-dark);
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-weight: var(--font-weight-medium);
+  font-size: 0.9em;
+}
+
+.type-item .example {
+  display: block;
+  font-style: italic;
+  color: var(--text-secondary);
+  font-size: 0.85em;
+  margin-top: 2px;
+  margin-left: var(--spacing-md);
 }
 
 /* Barre de recherche */
@@ -928,6 +979,11 @@ body {
   .format-header .format-cell::before {
     content: "";
     display: none;
+  }
+  
+  .type-item .example {
+    margin-left: 0;
+    margin-top: var(--spacing-xs);
   }
   
   .notification {
