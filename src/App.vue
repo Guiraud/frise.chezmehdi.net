@@ -253,6 +253,63 @@ export default {
             </div>
           </div>
           
+          <!-- Instructions de partage Google Sheets -->
+          <div class="card sharing-info">
+            <h2>Comment partager votre Google Sheets</h2>
+            <div class="sharing-warning">
+              <i class="icon-warning"></i>
+              <strong>Important :</strong> Votre document doit être public pour être accessible par l'application.
+            </div>
+            
+            <div class="sharing-steps">
+              <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                  <strong>Ouvrez votre Google Sheets</strong>
+                  <p>Accédez à votre document dans Google Drive ou Google Sheets</p>
+                </div>
+              </div>
+              
+              <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                  <strong>Cliquez sur "Partager" (bouton bleu en haut à droite)</strong>
+                  <p>Ou allez dans Fichier > Partager > Partager avec d'autres personnes</p>
+                </div>
+              </div>
+              
+              <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                  <strong>Changez l'accès à "Tous les utilisateurs avec le lien"</strong>
+                  <p>Cliquez sur "Accès restreint" puis sélectionnez "Tous les utilisateurs avec le lien"</p>
+                </div>
+              </div>
+              
+              <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                  <strong>Définissez les autorisations sur "Lecteur"</strong>
+                  <p>Assurez-vous que le niveau d'autorisation soit "Lecteur" (pas besoin d'édition)</p>
+                </div>
+              </div>
+              
+              <div class="step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                  <strong>Copiez le lien</strong>
+                  <p>Cliquez sur "Copier le lien" et collez-le dans le champ ci-dessus</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="sharing-alternative">
+              <h3>Alternative : Framacalc</h3>
+              <p>Vous pouvez aussi utiliser <a href="https://framacalc.org" target="_blank" rel="noopener noreferrer">Framacalc</a>, 
+              qui est public par défaut. Créez votre tableau, puis copiez l'URL de la page.</p>
+            </div>
+          </div>
+          
           <!-- Barre de recherche -->
           <div v-if="timelineData.length > 0" class="card search-container">
             <div class="search-box">
@@ -594,6 +651,100 @@ body {
   font-size: 0.85em;
   margin-top: 2px;
   margin-left: var(--spacing-md);
+}
+
+/* Instructions de partage */
+.sharing-info {
+  border-left: 4px solid var(--warning-color);
+}
+
+.sharing-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  border: 1px solid #ffeaa7;
+}
+
+.sharing-warning i {
+  color: var(--warning-color);
+  font-size: 1.2em;
+}
+
+.sharing-steps {
+  margin: var(--spacing-md) 0;
+}
+
+.step {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: var(--border-radius);
+  border-left: 3px solid var(--primary-color);
+}
+
+.step:last-child {
+  margin-bottom: 0;
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-content strong {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  color: var(--text-color);
+}
+
+.step-content p {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+.sharing-alternative {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background-color: var(--primary-light);
+  border-radius: var(--border-radius);
+  border-left: 3px solid var(--primary-color);
+}
+
+.sharing-alternative h3 {
+  color: var(--primary-dark);
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-lg);
+}
+
+.sharing-alternative p {
+  color: var(--primary-dark);
+  margin: 0;
+}
+
+.sharing-alternative a {
+  color: var(--primary-dark);
+  font-weight: var(--font-weight-medium);
 }
 
 /* Barre de recherche */
@@ -984,6 +1135,16 @@ body {
   .type-item .example {
     margin-left: 0;
     margin-top: var(--spacing-xs);
+  }
+  
+  .step {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    text-align: center;
+  }
+  
+  .step-number {
+    align-self: center;
   }
   
   .notification {
