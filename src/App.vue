@@ -174,6 +174,56 @@ export default {
             </div>
           </div>
           
+          <!-- Format attendu pour le tableur -->
+          <div class="card format-info">
+            <h2>Format du tableur</h2>
+            <p class="format-description">
+              Votre tableur doit contenir les colonnes suivantes (noms exacts) :
+            </p>
+            
+            <div class="format-table">
+              <div class="format-row format-header">
+                <div class="format-cell">Colonne</div>
+                <div class="format-cell">Description</div>
+                <div class="format-cell">Obligatoire</div>
+              </div>
+              
+              <div class="format-row">
+                <div class="format-cell format-column" data-label="Colonne">type</div>
+                <div class="format-cell" data-label="Description">Type d'événement : événement_contextuel, événement_déclencheur, période_contextuelle, période_activité</div>
+                <div class="format-cell format-required" data-label="Obligatoire">✓</div>
+              </div>
+              
+              <div class="format-row">
+                <div class="format-cell format-column" data-label="Colonne">date_début</div>
+                <div class="format-cell" data-label="Description">Date de début (format : AAAA-MM-JJ ou JJ/MM/AAAA)</div>
+                <div class="format-cell format-required" data-label="Obligatoire">✓</div>
+              </div>
+              
+              <div class="format-row">
+                <div class="format-cell format-column" data-label="Colonne">titre</div>
+                <div class="format-cell" data-label="Description">Titre de l'événement</div>
+                <div class="format-cell format-required" data-label="Obligatoire">✓</div>
+              </div>
+              
+              <div class="format-row">
+                <div class="format-cell format-column" data-label="Colonne">date_fin</div>
+                <div class="format-cell" data-label="Description">Date de fin pour les périodes (optionnel pour les événements ponctuels)</div>
+                <div class="format-cell format-optional" data-label="Obligatoire">—</div>
+              </div>
+              
+              <div class="format-row">
+                <div class="format-cell format-column" data-label="Colonne">description</div>
+                <div class="format-cell" data-label="Description">Description détaillée (optionnel)</div>
+                <div class="format-cell format-optional" data-label="Obligatoire">—</div>
+              </div>
+            </div>
+            
+            <div class="format-note">
+              <strong>Note :</strong> La première ligne doit contenir les en-têtes de colonnes.
+            </div>
+          </div>
+          
           <!-- Barre de recherche -->
           <div v-if="timelineData.length > 0" class="card search-container">
             <div class="search-box">
@@ -408,6 +458,76 @@ body {
   margin-top: var(--spacing-md);
   display: flex;
   justify-content: flex-end;
+}
+
+/* Section format du tableur */
+.format-info {
+  border-left: 4px solid var(--primary-color);
+}
+
+.format-description {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+.format-table {
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+  margin-bottom: var(--spacing-md);
+}
+
+.format-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr auto;
+  gap: 0;
+}
+
+.format-header {
+  background-color: var(--background-color);
+  font-weight: var(--font-weight-bold);
+}
+
+.format-cell {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  font-size: var(--font-size-sm);
+}
+
+.format-cell:last-child {
+  border-right: none;
+}
+
+.format-row:last-child .format-cell {
+  border-bottom: none;
+}
+
+.format-column {
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-weight: var(--font-weight-medium);
+  color: var(--primary-color);
+  background-color: rgba(66, 185, 131, 0.05);
+}
+
+.format-required {
+  color: var(--success-color);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+}
+
+.format-optional {
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.format-note {
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  border-left: 3px solid var(--primary-color);
 }
 
 /* Barre de recherche */
@@ -758,6 +878,41 @@ body {
   .legend {
     flex-direction: column;
     gap: var(--spacing-sm);
+  }
+  
+  .format-table {
+    font-size: 0.8rem;
+  }
+  
+  .format-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  
+  .format-cell {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .format-header .format-cell {
+    display: none;
+  }
+  
+  .format-header .format-cell:first-child {
+    display: block;
+  }
+  
+  .format-cell::before {
+    content: attr(data-label) ": ";
+    font-weight: var(--font-weight-bold);
+    display: inline-block;
+    min-width: 80px;
+  }
+  
+  .format-header .format-cell::before {
+    content: "";
+    display: none;
   }
   
   .notification {
