@@ -324,7 +324,7 @@ const fetchSheetData = async (url, options = {}) => {
  * @param {string} query - La requête de recherche
  * @returns {Array<Object>} Les données filtrées
  */
-export const filterTimelineData = (data, query) => {
+const filterTimelineData = (data, query) => {
   if (!query) return data;
   
   const searchTerm = query.toLowerCase();
@@ -344,7 +344,7 @@ export const filterTimelineData = (data, query) => {
  * @param {string} order - L'ordre de tri ('asc' ou 'desc')
  * @returns {Array<Object>} Les données triées
  */
-export const sortTimelineData = (data, order = 'asc') => {
+const sortTimelineData = (data, order = 'asc') => {
   return [...data].sort((a, b) => {
     const dateA = new Date(a.start);
     const dateB = new Date(b.start);
@@ -357,8 +357,10 @@ export const sortTimelineData = (data, order = 'asc') => {
   });
 };
 
-// Les fonctions sont déjà exportées individuellement ci-dessus
-// Exporter aussi par défaut pour la rétrocompatibilité
+// Export des fonctions individuelles pour l'importation nommée
+export { fetchSheetData, filterTimelineData, sortTimelineData };
+
+// Export par défaut pour la rétrocompatibilité
 export default {
   fetchSheetData,
   filterTimelineData,
