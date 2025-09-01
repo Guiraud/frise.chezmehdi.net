@@ -124,12 +124,16 @@ export default {
         });
       }
       
+      console.log('🏗️ Creating Timeline with options:', this.options);
+      
       this.timeline = new Timeline(
         container,
         this.items,
         this.groups,
         this.options
       );
+      
+      console.log('📊 Timeline created successfully');
 
       // Gestion des événements
       this.timeline.on('select', this.handleSelect);

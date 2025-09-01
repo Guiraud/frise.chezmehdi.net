@@ -48,14 +48,29 @@ export const parseSheetData = (rows) => {
     
     // Format dates
     if (item.date_début) {
-      item.start = new Date(item.date_début).toISOString();
+      const startDate = new Date(item.date_début);
+      console.log('🗓️ Parsing start date:', item.date_début, '→', startDate);
+      
+      if (!isNaN(startDate.getTime())) {
+        item.start = startDate.toISOString();
+        console.log('✅ Valid start date:', item.start);
+      } else {
+        console.error('❌ Invalid start date:', item.date_début);
+        return null; // Skip this item
+      }
     }
     
     if (item.date_fin) {
-      item.end = new Date(item.date_fin).toISOString();
-    } else if (item.date_début) {
-      // If no end date, use start date
-      item.end = new Date(item.date_début).toISOString();
+      const endDate = new Date(item.date_fin);
+      console.log('🗓️ Parsing end date:', item.date_fin, '→', endDate);
+      
+      if (!isNaN(endDate.getTime())) {
+        item.end = endDate.toISOString();
+        console.log('✅ Valid end date:', item.end);
+      }
+    } else if (item.date_début && item.start) {
+      // If no end date, use start date for point events
+      item.end = item.start;
     }
     
     // Determine CSS class based on original type
@@ -81,8 +96,9 @@ export const parseSheetData = (rows) => {
       item.title = item.titre;
     }
     
+    console.log('📋 Final item structure:', item);
     return item;
-  }).filter(item => item.start); // Filter items without valid start date
+  }).filter(item => item && item.start); // Filter items without valid start date or null items
 };
 
 /**

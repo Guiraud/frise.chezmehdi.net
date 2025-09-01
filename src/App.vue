@@ -171,6 +171,57 @@ export default {
       @error="handleGlobalError"
       @retry="handleRetry"
     >
+      <!-- Timeline principale - EN TÊTE -->
+      <div v-if="timelineData.length > 0" class="timeline-header-section">
+        <div class="container">
+          <!-- Barre de recherche -->
+          <div class="card search-container">
+            <div class="search-box">
+              <input 
+                v-model="searchQuery" 
+                type="text" 
+                placeholder="Rechercher dans la frise..." 
+                class="search-input"
+              >
+              <i class="icon-search"></i>
+            </div>
+            <div class="results-count">
+              {{ timelineData.length }} événement{{ timelineData.length > 1 ? 's' : '' }}
+            </div>
+          </div>
+
+          <!-- Timeline with its own error boundary -->
+          <ErrorBoundary fallback-message="Erreur lors de l'affichage de la timeline">
+            <Timeline 
+              :items="timelineData"
+              @select="handleItemSelect"
+              @rangechanged="handleRangeChange"
+              class="timeline-card timeline-prominent"
+            />
+          </ErrorBoundary>
+          
+          <!-- Légende -->
+          <div class="legend">
+            <div class="legend-item">
+              <span class="legend-color event-context"></span>
+              <span>Événement contextuel</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color event-trigger"></span>
+              <span>Événement déclencheur</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color period-context"></span>
+              <span>Période contextuelle</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color period-activity"></span>
+              <span>Période d'activité</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <main class="app-main">
         <div class="container">
           <!-- Zone de saisie de l'URL du tableur -->
@@ -188,22 +239,6 @@ export default {
             </div>
           </div>
 
-          <!-- Barre de recherche -->
-          <div v-if="timelineData.length > 0" class="card search-container">
-            <div class="search-box">
-              <input 
-                v-model="searchQuery" 
-                type="text" 
-                placeholder="Rechercher dans la frise..." 
-                class="search-input"
-              >
-              <i class="icon-search"></i>
-            </div>
-            <div class="results-count">
-              {{ timelineData.length }} événement{{ timelineData.length > 1 ? 's' : '' }}
-            </div>
-          </div>
-
           <!-- Chargement en cours -->
           <div v-if="loading" class="loading">
             <div class="spinner"></div>
@@ -214,39 +249,6 @@ export default {
           <div v-else-if="error" class="error-message">
             <i class="icon-error"></i>
             <p>{{ error }}</p>
-          </div>
-
-          <!-- Timeline principale -->
-          <div v-else-if="timelineData.length > 0" class="timeline-wrapper">
-            <!-- Timeline with its own error boundary -->
-            <ErrorBoundary fallback-message="Erreur lors de l'affichage de la timeline">
-              <Timeline 
-                :items="timelineData"
-                @select="handleItemSelect"
-                @rangechanged="handleRangeChange"
-                class="timeline-card timeline-prominent"
-              />
-            </ErrorBoundary>
-            
-            <!-- Légende -->
-            <div class="legend">
-              <div class="legend-item">
-                <span class="legend-color event-context"></span>
-                <span>Événement contextuel</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color event-trigger"></span>
-                <span>Événement déclencheur</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color period-context"></span>
-                <span>Période contextuelle</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-color period-activity"></span>
-                <span>Période d'activité</span>
-              </div>
-            </div>
           </div>
 
           <!-- Instructions pliables -->
@@ -858,6 +860,15 @@ body {
   font-size: 1.2em;
 }
 
+/* Timeline en tête de page */
+.timeline-header-section {
+  background: linear-gradient(135deg, var(--primary-light), rgba(255, 255, 255, 0.9));
+  border-bottom: 3px solid var(--primary-color);
+  padding: var(--spacing-xl) 0;
+  margin-bottom: var(--spacing-lg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
 /* Conteneur de la timeline */
 .timeline-wrapper {
   margin-top: var(--spacing-lg);
@@ -872,9 +883,11 @@ body {
 }
 
 .timeline-prominent {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  border: 2px solid var(--primary-color);
-  margin: var(--spacing-xl) 0;
+  box-shadow: 0 6px 30px rgba(66, 185, 131, 0.2);
+  border: 3px solid var(--primary-color);
+  margin: var(--spacing-lg) 0;
+  border-radius: var(--border-radius-lg);
+  background: var(--surface-color);
 }
 
 /* Instructions pliables */
