@@ -110,6 +110,20 @@ export default {
     initTimeline() {
       const container = this.$refs.timeline;
       
+      console.log('🔍 Timeline items received:', this.items);
+      console.log('📊 Items count:', this.items.length);
+      
+      // Vérifier le format des items
+      if (this.items.length > 0) {
+        console.log('📋 First item structure:', this.items[0]);
+        console.log('📋 Required fields check:', {
+          hasId: !!this.items[0].id,
+          hasStart: !!this.items[0].start,
+          hasContent: !!(this.items[0].content || this.items[0].titre),
+          hasType: !!this.items[0].type
+        });
+      }
+      
       this.timeline = new Timeline(
         container,
         this.items,

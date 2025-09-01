@@ -71,6 +71,16 @@ export const parseSheetData = (rows) => {
       item.type = 'point'; // Single point in time
     }
     
+    // Add content field required by vis-timeline
+    item.content = item.titre || 'Événement sans titre';
+    
+    // Add title field for tooltips
+    if (item.description) {
+      item.title = `${item.titre}\n${item.description}`;
+    } else {
+      item.title = item.titre;
+    }
+    
     return item;
   }).filter(item => item.start); // Filter items without valid start date
 };
