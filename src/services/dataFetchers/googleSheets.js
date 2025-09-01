@@ -25,45 +25,87 @@ export const extractGoogleSheetId = (url) => {
 };
 
 /**
- * Fetches data from Google Sheets
+ * Fetches data from Google Sheets using CSV export
  * @param {string} sheetId - Google Sheets ID
- * @param {string} apiKey - Google API key (optional)
+ * @param {string} apiKey - Google API key (optional, not used with CSV method)
  * @returns {Promise<Array<Array>>} Raw sheet data
  */
 export const fetchGoogleSheetData = async (sheetId, apiKey = '') => {
   const startTime = performance.now();
-  const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A1:Z1000?key=${apiKey}`;
+  // Use CSV export URL which works without API key for public sheets
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0`;
   
   // Import performance monitor dynamically to avoid circular deps
   const { default: performanceMonitor } = await import('../../utils/performanceMonitor.js');
   
   try {
-    const response = await fetch(apiUrl);
+    console.log('Fetching Google Sheets via CSV export:', csvUrl);
+    const response = await fetch(csvUrl);
     
     if (!response.ok) {
       const endTime = performance.now();
-      performanceMonitor.trackApiCall('google', apiUrl, startTime, endTime, false, `HTTP Error: ${response.status}`);
+      performanceMonitor.trackApiCall('google', csvUrl, startTime, endTime, false, `HTTP Error: ${response.status}`);
+      
+      if (response.status === 403) {
+        throw new Error('Unable to access Google Sheets. Make sure the document is shared publicly with "Anyone with the link" can view.');
+      }
+      
       throw new Error(`HTTP Error: ${response.status}`);
     }
     
-    const data = await response.json();
+    const csvText = await response.text();
     const endTime = performance.now();
     
-    performanceMonitor.trackApiCall('google', apiUrl, startTime, endTime, true);
+    performanceMonitor.trackApiCall('google', csvUrl, startTime, endTime, true);
     
-    return data.values || [];
+    // Parse CSV text into array of arrays
+    const lines = csvText.split('\n').filter(line => line.trim());
+    const data = lines.map(line => {
+      // Simple CSV parsing - handle quoted values
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          result.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      
+      // Add the last field
+      result.push(current.trim());
+      
+      return result;
+    });
+    
+    console.log('Successfully parsed Google Sheets CSV data:', data.length, 'rows');
+    return data;
+    
   } catch (error) {
     const endTime = performance.now();
     
     // Track timeout specifically
     if (error.name === 'AbortError' || error.message.includes('timeout')) {
-      performanceMonitor.trackTimeout('google', apiUrl, 8000); // Current timeout value
+      performanceMonitor.trackTimeout('google', csvUrl, 8000);
     }
     
-    performanceMonitor.trackApiCall('google', apiUrl, startTime, endTime, false, error.message);
-    performanceMonitor.trackError('fetch_error', error.message, 'googleSheets', { sheetId, apiUrl });
+    performanceMonitor.trackApiCall('google', csvUrl, startTime, endTime, false, error.message);
+    performanceMonitor.trackError('fetch_error', error.message, 'googleSheets', { sheetId, csvUrl });
     
     console.error('Error fetching Google Sheets data:', error);
+    
+    // If it's already our custom error message, re-throw it
+    if (error.message.includes('shared publicly')) {
+      throw error;
+    }
+    
     throw new Error('Unable to load data from Google Sheets. Check the URL and ensure the document is public.');
   }
 };
