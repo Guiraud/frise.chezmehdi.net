@@ -33,6 +33,12 @@ export const parseSheetData = (rows) => {
       }
     });
     
+    // Skip empty rows (no title and no start date)
+    if (!item.titre || !item.date_début) {
+      console.log('⏭️ Skipping empty row:', index + 1, item);
+      return null;
+    }
+    
     // Add unique ID if not provided
     if (!item.id) {
       item.id = `item-${index + 1}`;
