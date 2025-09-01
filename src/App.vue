@@ -1,57 +1,39 @@
 <script>
-import { ref, computed } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import SpreadsheetInput from './components/SpreadsheetInput.vue';
 import Timeline from './components/Timeline.vue';
-import { fetchSheetData, filterTimelineData } from './services/sheetService';
+import ErrorBoundary from './components/ErrorBoundary.vue';
+import DevTools from './components/DevTools.vue';
+import { useTimeline } from './composables/useTimeline';
+import { useUrlState } from './composables/useUrlState';
+import { useNotifications } from './composables/useNotifications';
 
 export default {
   name: 'App',
   components: {
     SpreadsheetInput,
-    Timeline
+    Timeline,
+    ErrorBoundary,
+    DevTools
   },
   setup() {
-    const route = useRoute();
-    const router = useRouter();
-    
-    // États
-    const timelineData = ref([]);
-    const loading = ref(false);
-    const error = ref(null);
-    const searchQuery = ref('');
-    const spreadsheetUrl = ref('');
-    const notification = ref({ show: false, message: '', type: 'info' });
-    
-    // Données filtrées en fonction de la recherche
-    const filteredData = computed(() => {
-      return filterTimelineData(timelineData.value, searchQuery.value);
-    });
+    // Composables
+    const timeline = useTimeline();
+    const urlState = useUrlState();
+    const notifications = useNotifications();
     
     // Gestion de la soumission de l'URL du tableur
     const handleUrlSubmit = async (url) => {
       if (!url) return;
       
-      loading.value = true;
-      error.value = null;
-      spreadsheetUrl.value = url;
-      
       try {
-        // Mise à jour de l'URL avec le paramètre de recherche
-        const params = new URLSearchParams(window.location.search);
-        params.set('url', encodeURIComponent(url));
-        window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
-        
-        // Récupération des données
-        const data = await fetchSheetData(url);
-        timelineData.value = data;
-        showNotification('Données chargées avec succès', 'success');
+        urlState.updateUrlWithSpreadsheet(url);
+        await timeline.loadTimelineData(url);
+        notifications.showSuccess('Données chargées avec succès');
       } catch (err) {
         console.error('Erreur lors du chargement des données:', err);
-        error.value = 'Erreur lors du chargement des données: ' + (err.message || 'Une erreur est survenue');
-        showNotification(error.value, 'error');
-      } finally {
-        loading.value = false;
+        notifications.showError('Erreur lors du chargement des données: ' + (err.message || 'Une erreur est survenue'));
       }
     };
     
@@ -59,75 +41,101 @@ export default {
     const handleItemSelect = (properties) => {
       if (properties.items && properties.items.length > 0) {
         const itemId = properties.items[0];
-        // Mise à jour de l'URL avec l'ancre de l'élément sélectionné
-        window.location.hash = `event-${itemId}`;
+        urlState.updateUrlWithSelection(itemId);
       }
     };
     
     // Gestion du changement de plage de dates
     const handleRangeChange = (range) => {
-      // Mise à jour de l'URL avec la plage de dates
-      const params = new URLSearchParams(window.location.search);
-      params.set('start', range.start.toISOString());
-      params.set('end', range.end.toISOString());
-      window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
-    };
-    
-    // Affichage d'une notification
-    const showNotification = (message, type = 'info') => {
-      notification.value = {
-        show: true,
-        message,
-        type
-      };
-      
-      // Masquer la notification après 5 secondes
-      setTimeout(() => {
-        notification.value.show = false;
-      }, 5000);
+      urlState.updateUrlWithDateRange(range);
     };
     
     // Copie du lien de partage
     const copyShareLink = () => {
-      const url = window.location.href.split('?')[0];
-      navigator.clipboard.writeText(url).then(() => {
-        showNotification('Lien copié dans le presse-papiers', 'success');
+      const shareUrl = urlState.getShareableLink();
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        notifications.showSuccess('Lien copié dans le presse-papiers');
       }).catch(err => {
         console.error('Erreur lors de la copie du lien:', err);
-        showNotification('Erreur lors de la copie du lien', 'error');
+        notifications.showError('Erreur lors de la copie du lien');
       });
     };
     
-    // Chargement initial depuis l'URL si présente
-    const loadFromUrl = () => {
-      const params = new URLSearchParams(window.location.search);
-      const urlParam = params.get('url');
-      
-      if (urlParam) {
-        const url = decodeURIComponent(urlParam);
-        spreadsheetUrl.value = url;
-        handleUrlSubmit(url);
+    // Error handling for error boundary
+    const lastAction = ref(null);
+    
+    const handleGlobalError = (errorInfo) => {
+      console.error('🚨 Global error caught:', errorInfo);
+      notifications.showError('Une erreur inattendue s\'est produite');
+    };
+    
+    const handleRetry = () => {
+      if (lastAction.value) {
+        console.log('🔄 Retrying last action:', lastAction.value);
+        lastAction.value();
       }
     };
     
+    const retryLastAction = () => {
+      if (lastAction.value) {
+        lastAction.value();
+      } else {
+        // Default retry - reload the current URL
+        const currentUrl = urlState.spreadsheetUrl.value;
+        if (currentUrl) {
+          handleUrlSubmit(currentUrl);
+        }
+      }
+    };
+    
+    // Enhanced handleUrlSubmit with retry tracking
+    const enhancedHandleUrlSubmit = async (url) => {
+      lastAction.value = () => enhancedHandleUrlSubmit(url);
+      return handleUrlSubmit(url);
+    };
+    
     // Chargement initial
-    loadFromUrl();
+    onMounted(() => {
+      const initialUrl = urlState.loadFromUrl();
+      if (initialUrl) {
+        enhancedHandleUrlSubmit(initialUrl);
+      }
+    });
     
     return {
-      // États
-      timelineData: filteredData,
-      loading,
-      error,
-      searchQuery,
-      spreadsheetUrl,
-      notification,
+      // Timeline state
+      timelineData: timeline.timelineData,
+      loading: timeline.loading,
+      error: timeline.error,
+      searchQuery: timeline.searchQuery,
       
-      // Méthodes
-      handleUrlSubmit,
+      // URL state
+      spreadsheetUrl: urlState.spreadsheetUrl,
+      
+      // Notifications
+      notification: notifications.notification,
+      getNotificationIcon: notifications.getNotificationIcon,
+      
+      // Methods
+      handleUrlSubmit: enhancedHandleUrlSubmit,
       handleItemSelect,
       handleRangeChange,
-      showNotification,
-      copyShareLink
+      copyShareLink,
+      
+      // Error boundary methods
+      handleGlobalError,
+      handleRetry,
+      retryLastAction,
+      
+      // Development methods
+      handleSimulatedError: (info) => {
+        console.log('🧪 Simulated error:', info);
+        notifications.showError(`Test error: ${info.type}`);
+      },
+      handleTestCompleted: (result) => {
+        console.log('✅ Test completed:', result);
+        notifications.showSuccess(`Test completed: ${result.type}`);
+      }
     };
   }
 };
@@ -143,93 +151,101 @@ export default {
       </div>
     </header>
 
-
-    <main class="app-main">
-      <div class="container">
-        <!-- Zone de saisie de l'URL du tableur -->
-        <div class="card">
-          <h2>Charger un tableur</h2>
-          <SpreadsheetInput 
-            :initial-url="spreadsheetUrl"
-            @submit="handleUrlSubmit" 
-          />
+    <!-- Error Boundary wrapper for main content -->
+    <ErrorBoundary 
+      :retry-callback="retryLastAction"
+      @error="handleGlobalError"
+      @retry="handleRetry"
+    >
+      <main class="app-main">
+        <div class="container">
+          <!-- Zone de saisie de l'URL du tableur -->
+          <div class="card">
+            <h2>Charger un tableur</h2>
+            <SpreadsheetInput 
+              :initial-url="spreadsheetUrl"
+              @submit="handleUrlSubmit" 
+            />
+            
+            <div v-if="spreadsheetUrl" class="share-section">
+              <button @click="copyShareLink" class="btn btn-outline">
+                <i class="icon-link"></i> Copier le lien de partage
+              </button>
+            </div>
+          </div>
           
-          <div v-if="spreadsheetUrl" class="share-section">
-            <button @click="copyShareLink" class="btn btn-outline">
-              <i class="icon-link"></i> Copier le lien de partage
-            </button>
+          <!-- Barre de recherche -->
+          <div v-if="timelineData.length > 0" class="card search-container">
+            <div class="search-box">
+              <input 
+                v-model="searchQuery" 
+                type="text" 
+                placeholder="Rechercher dans la frise..." 
+                class="search-input"
+              >
+              <i class="icon-search"></i>
+            </div>
+            <div class="results-count">
+              {{ timelineData.length }} événement{{ timelineData.length > 1 ? 's' : '' }}
+            </div>
           </div>
-        </div>
-        
-        <!-- Barre de recherche -->
-        <div v-if="timelineData.length > 0" class="card search-container">
-          <div class="search-box">
-            <input 
-              v-model="searchQuery" 
-              type="text" 
-              placeholder="Rechercher dans la frise..." 
-              class="search-input"
-            >
-            <i class="icon-search"></i>
+
+          <!-- Chargement en cours -->
+          <div v-if="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Chargement des données...</p>
           </div>
-          <div class="results-count">
-            {{ filteredData.length }} événement{{ filteredData.length > 1 ? 's' : '' }}
+
+          <!-- Message d'erreur -->
+          <div v-else-if="error" class="error-message">
+            <i class="icon-error"></i>
+            <p>{{ error }}</p>
           </div>
-        </div>
 
-        <!-- Chargement en cours -->
-        <div v-if="loading" class="loading">
-          <div class="spinner"></div>
-          <p>Chargement des données...</p>
-        </div>
-
-        <!-- Message d'erreur -->
-        <div v-else-if="error" class="error-message">
-          <i class="icon-error"></i>
-          <p>{{ error }}</p>
-        </div>
-
-        <!-- Contenu principal -->
-        <div v-else-if="timelineData.length > 0" class="timeline-wrapper">
-          <!-- Composant Timeline -->
-          <Timeline 
-            :items="filteredData"
-            @select="handleItemSelect"
-            @rangechanged="handleRangeChange"
-            class="timeline-card"
-          />
+          <!-- Contenu principal -->
+          <div v-else-if="timelineData.length > 0" class="timeline-wrapper">
+            <!-- Timeline with its own error boundary -->
+            <ErrorBoundary fallback-message="Erreur lors de l'affichage de la timeline">
+              <Timeline 
+                :items="timelineData"
+                @select="handleItemSelect"
+                @rangechanged="handleRangeChange"
+                class="timeline-card"
+              />
+            </ErrorBoundary>
+            
+            <!-- Légende -->
+            <div class="legend">
+              <div class="legend-item">
+                <span class="legend-color event-context"></span>
+                <span>Événement contextuel</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color event-trigger"></span>
+                <span>Événement déclencheur</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color period-context"></span>
+                <span>Période contextuelle</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-color period-activity"></span>
+                <span>Période d'activité</span>
+              </div>
+            </div>
+          </div>
           
-          <!-- Légende -->
-          <div class="legend">
-            <div class="legend-item">
-              <span class="legend-color event-context"></span>
-              <span>Événement contextuel</span>
+          <!-- État vide -->
+          <div v-else class="empty-state">
+            <div class="empty-icon">
+              <i class="icon-timeline"></i>
             </div>
-            <div class="legend-item">
-              <span class="legend-color event-trigger"></span>
-              <span>Événement déclencheur</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-color period-context"></span>
-              <span>Période contextuelle</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-color period-activity"></span>
-              <span>Période d'activité</span>
-            </div>
+            <h3>Commencez par charger un tableur</h3>
+            <p>Collez l'URL d'un tableur Google Sheets ou Framacalc pour générer votre frise chronologique.</p>
           </div>
         </div>
-        
-        <!-- État vide -->
-        <div v-else class="empty-state">
-          <div class="empty-icon">
-            <i class="icon-timeline"></i>
-          </div>
-          <h3>Commencez par charger un tableur</h3>
-          <p>Collez l'URL d'un tableur Google Sheets ou Framacalc pour générer votre frise chronologique.</p>
-        </div>
-      </div>
-    </main>
+      </main>
+    </ErrorBoundary>
 
     <!-- Pied de page -->
     <footer class="app-footer">
@@ -253,6 +269,12 @@ export default {
         </button>
       </div>
     </transition>
+    
+    <!-- Development Tools (only in debug mode) -->
+    <DevTools 
+      @error-simulated="handleSimulatedError"
+      @test-completed="handleTestCompleted"
+    />
   </div>
 </template>
 
