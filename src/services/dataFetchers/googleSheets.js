@@ -58,32 +58,23 @@ export const fetchGoogleSheetData = async (sheetId, apiKey = '') => {
     
     performanceMonitor.trackApiCall('google', csvUrl, startTime, endTime, true);
     
-    // Parse CSV text into array of arrays
-    const lines = csvText.split('\n').filter(line => line.trim());
-    const data = lines.map(line => {
-      // Simple CSV parsing - handle quoted values
-      const result = [];
-      let current = '';
-      let inQuotes = false;
-      
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        
-        if (char === '"') {
-          inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
-          result.push(current.trim());
-          current = '';
-        } else {
-          current += char;
-        }
-      }
-      
-      // Add the last field
-      result.push(current.trim());
-      
-      return result;
-    });
+    // Import CSV parser
+    const { parseCSVData } = await import('../parsers/csvParser.js');
+    
+    // Parse CSV text into objects, then convert to array of arrays
+    const parsedObjects = parseCSVData(csvText);
+    
+    if (parsedObjects.length === 0) {
+      console.log('No data found in Google Sheets');
+      return [];
+    }
+    
+    // Convert objects back to array of arrays format expected by timeline parser
+    const headers = Object.keys(parsedObjects[0]);
+    const data = [
+      headers, // Header row
+      ...parsedObjects.map(obj => headers.map(header => obj[header] || ''))
+    ];
     
     console.log('Successfully parsed Google Sheets CSV data:', data.length, 'rows');
     return data;
