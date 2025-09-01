@@ -206,9 +206,9 @@ console.log('CSV parsed:', parsedData)
 - Créer des artifacts pour les nouveaux composants
 - Tester les modifications avec l'outil repl si nécessaire
 
-## 📊 Technologie Actuelle : vis-timeline
+## 📊 Technologies de Timeline
 
-### 🎯 Bibliothèque Utilisée
+### 🎯 Technologie Principale : vis-timeline
 
 Le projet utilise actuellement **vis-timeline** pour l'affichage des frises chronologiques :
 
@@ -226,15 +226,53 @@ src/components/Timeline.vue
 └── Custom CSS               # Styles personnalisés par type d'événement
 ```
 
-### 📁 Exemples Disponibles (References)
+### 📁 Exemples de Technologies Alternatives
 
 Le dossier `Examples/` contient des prototypes pour futures implémentations :
-- `d3js/` - Exemple D3.js (non intégré)
-- `chartjs/` - Exemple Chart.js (non intégré)  
-- `apexcharts/` - Exemple ApexCharts (non intégré)
-- `pyrennees/` - Données d'exemple JSON
 
-**Note :** Ces exemples sont des références pour de futures améliorations. Consultez `TODOs.md` pour les plans d'intégration.
+#### **D3.js** (`Examples/d3js/`)
+- **Fichier :** `timeline-betharram-d3.html`
+- **Avantages :** Contrôle total, interactions avancées, performance
+- **Fonctionnalités :** Zoom/pan natif, SVG, animations fluides
+- **Cas d'usage :** Visualisations complexes, interactions personnalisées
+
+#### **Chart.js** (`Examples/chartjs/`)
+- **Fichier :** `timeline-betharram-chartjs.html`
+- **Avantages :** Simplicité, responsive, plugins riches
+- **Fonctionnalités :** Multiple vues, export PNG/SVG, densité temporelle
+- **Cas d'usage :** Dashboards, rapports, analyses statistiques
+
+#### **ApexCharts** (`Examples/apexcharts/`)
+- **Fichier :** `timeline-betharram-apex.html`
+- **Avantages :** Configuration déclarative, thèmes, toolbar intégré
+- **Fonctionnalités :** RangeBar timeline, animations, export natif
+- **Cas d'usage :** Applications business, présentations
+
+### 🗃️ Données Source
+
+**Fichier :** `Examples/pyrennees/republique-pyrenees-betharram-timeline.json`
+
+```json
+{
+  "repuPyreneesEvents": [26 événements], // Événements ponctuels
+  "repuPyreneesPeriods": [6 périodes],    // Périodes avec couleurs
+  "TimelineFacts": [5 faits]              // Faits additionnels
+}
+```
+
+### 🛠️ Intégration dans le Projet Principal
+
+**Pour Cursor/Windsurf :**
+```prompt
+Créer un composant Vue 3 qui intègre [D3.js/Chart.js/ApexCharts] 
+basé sur l'exemple Examples/[technologie]/timeline-betharram-[tech].html
+```
+
+**Pour Claude Desktop :**
+```prompt
+Analyser Examples/[technologie]/ et créer un composant Vue réutilisable 
+avec props pour les données et options de configuration
+```
 
 ---
 
@@ -245,14 +283,16 @@ Le projet est maintenant prêt pour le développement avec votre éditeur AI pr�
 **Prochaines étapes suggérées :**
 1. Lancer `npm run dev`
 2. Tester l'application avec des données CSV locales
-3. Explorer le code des composants existants
-4. Consulter `TODOs.md` pour voir les prochaines fonctionnalités
-5. Développer de nouvelles fonctionnalités avec l'IA
+3. Explorer les exemples dans `Examples/`
+4. Explorer le code des composants existants
+5. Choisir la technologie adaptée à votre cas d'usage
+6. Développer de nouvelles fonctionnalités avec l'IA
 
 **🎨 Pour commencer rapidement :**
 - Créer un fichier CSV dans le dossier `public/`
 - Saisir le nom du fichier dans l'interface
 - Tester les interactions timeline (zoom, sélection)
 - Examiner le code source dans `src/components/Timeline.vue`
+- Ouvrir `Examples/d3js/timeline-betharram-d3.html` dans le navigateur pour voir les alternatives
 
 Happy coding! 🎉

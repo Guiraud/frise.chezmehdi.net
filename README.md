@@ -16,7 +16,7 @@ Application de frise chronologique interactive développée avec Vue 3 et Vite. 
 
 ### Prérequis
 
-- Node.js (version 16 ou supérieure)
+- Node.js (version 18 ou supérieure)  
 - npm ou yarn
 
 ### Installation
@@ -24,7 +24,7 @@ Application de frise chronologique interactive développée avec Vue 3 et Vite. 
 1. Cloner le dépôt :
 
    ```bash
-   git clone https://gitlab.com/votre-utilisateur/frise.chezmehdi.net.git
+   git clone git@gitlab.com:journalism-with-ai/frise.chezmehdi.net.git
    cd frise.chezmehdi.net
    ```
 
@@ -111,35 +111,54 @@ Le fichier `.gitlab-ci.yml` contient :
 ## 🛠 Technologies utilisées
 
 - **Vue 3** (Composition API)
-- **Vite** (bundler et serveur de développement)
-- **vis-timeline** (affichage des timelines interactives)
-- **Vue Router** (navigation)
-- **CSS custom properties** (thématisation)
+- **Vite** (Build tool et dev server)
+- **vis-timeline** (Visualisation de timeline)
+- **Vue Router** (Routing)
 
-## 🏗 Architecture
+## 🔧 Développement et CI/CD
 
+### Pipeline GitLab CI
+
+Le projet utilise un pipeline GitLab CI/CD complet avec 4 étapes :
+
+1. **Install** - Installation des dépendances avec cache
+2. **Quality** - Vérifications qualité (linting, tests, type checking)
+3. **Build** - Construction pour production et preview
+4. **Deploy** - Déploiement manuel vers Cloudflare Pages
+
+### Variables d'environnement GitLab
+
+Configurez ces variables dans GitLab (Settings → CI/CD → Variables) :
+
+- `CLOUDFLARE_API_TOKEN` - Token API Cloudflare avec permissions Pages
+- `CLOUDFLARE_ACCOUNT_ID` - ID de compte Cloudflare
+- `CLOUDFLARE_PROJECT_NAME` - Nom du projet Pages
+
+### Environnements
+
+- **Production** : `main` → https://frise.chezmehdi.net
+- **Staging** : `develop` → https://develop.frise.chezmehdi.net
+- **Preview** : Merge requests (déclenchement manuel)
+
+### Test local de la pipeline
+
+```bash
+# Test du build
+npm run build
+
+# Test du serveur de dev
+npm run dev
+
+# Test des scripts de qualité (placeholders)
+npm run lint
+npm run test
 ```
-src/
-├── components/
-│   ├── Timeline.vue          # Composant timeline principal
-│   ├── SpreadsheetInput.vue  # Saisie d'URL de tableur
-│   └── HelloWorld.vue        # Composant exemple
-├── services/
-│   └── sheetService.js       # Service import de données
-├── router/
-│   └── index.js             # Configuration des routes
-├── views/
-│   └── Home.vue            # Page d'accueil
-└── App.vue                 # Composant racine
-```
 
-## 🤝 Contribution
+### Documentation
 
-1. Fork le projet
-2. Créez votre branche feature (`git checkout -b feature/AmazingFeature`)
-3. Committez vos changements (`git commit -m 'Add AmazingFeature'`)
-4. Push vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrez une Merge Request
+- `CLAUDE.md` - Guide pour Claude Code
+- `DEPLOYMENT.md` - Guide de déploiement détaillé
+- `wrangler.toml` - Configuration Cloudflare Pages
 
 ## 📝 Licence
 

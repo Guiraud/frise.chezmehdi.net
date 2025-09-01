@@ -1,0 +1,47 @@
+{
+  "type": "historical",
+  "name": "TimelineSecondGuerremondiale",
+  "description": "Frise chronologique de la Seconde Guerre mondiale",
+  "domain": "histoire",
+  "period": "1939-1945",
+  "features": [
+    "zoom",
+    "pan", 
+    "filter",
+    "export",
+    "search",
+    "clustering"
+  ],
+  "data_source": "spreadsheet",
+  "library": "vis-timeline",
+  "options": {
+    "responsive": true,
+    "interactive": true,
+    "animation": true,
+    "grouping": true,
+    "clustering": true,
+    "export_formats": ["png", "svg", "pdf"]
+  },
+  "styles": {
+    "theme": "historical",
+    "colors": ["#8B4513", "#CD853F", "#DEB887", "#F5DEB3"],
+    "background": "linear-gradient(to bottom, #faf7f2, #ffffff)"
+  },
+  "data_fields": [
+    "date",
+    "event", 
+    "description",
+    "category",
+    "location",
+    "importance",
+    "sources"
+  ],
+  "expected_volume": "large",
+  "target_audience": "students",
+  "languages": ["fr", "en"],
+  "accessibility": {
+    "screen_reader": true,
+    "high_contrast": true,
+    "keyboard_navigation": true
+  }
+}

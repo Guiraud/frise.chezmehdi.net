@@ -1,0 +1,89 @@
+{
+  "name": "timeline-generator",
+  "version": "1.0.0",
+  "description": "Générateur de frises chronologiques interactives utilisant mcp-delegate et la pensée séquentielle",
+  "type": "module",
+  "main": "main.js",
+  "bin": {
+    "timeline-gen": "./main.js",
+    "tgen": "./main.js"
+  },
+  "scripts": {
+    "start": "node main.js",
+    "generate": "node main.js generate",
+    "analyze": "node main.js analyze",
+    "test-connectivity": "node main.js test",
+    "help": "node main.js help",
+    "demo-historical": "node main.js generate config/historical.json",
+    "demo-scientific": "node main.js generate config/scientific.json",
+    "demo-business": "node main.js generate config/business.json",
+    "demo-personal": "node main.js generate config/personal.json",
+    "demo-project": "node main.js generate config/project.json",
+    "fragment-test": "node main.js fragment 'Analyse complexe pour génération de timeline avec Vue.js et visualisation de données temporelles'",
+    "install-global": "npm install -g .",
+    "dev": "node --watch main.js",
+    "lint": "eslint *.js **/*.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "timeline",
+    "chronology",
+    "visualization",
+    "vue",
+    "mcp-delegate",
+    "llm",
+    "generator",
+    "interactive",
+    "data-visualization"
+  ],
+  "author": "Mehdi Guiraud",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/username/frise.chezmehdi.net.git"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "readline": "^1.3.0",
+    "commander": "^11.0.0",
+    "chalk": "^5.3.0",
+    "ora": "^7.0.1",
+    "inquirer": "^9.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.50.0",
+    "@eslint/js": "^9.0.0",
+    "nodemon": "^3.0.0"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0",
+    "vis-timeline": "^7.0.0"
+  },
+  "optionalDependencies": {
+    "d3": "^7.0.0",
+    "plotly.js": "^2.0.0",
+    "chart.js": "^4.0.0"
+  },
+  "files": [
+    "main.js",
+    "timeline-generator.js", 
+    "thinking-engine/",
+    "templates/",
+    "libraries/",
+    "config/",
+    "README.md",
+    "LICENSE"
+  ],
+  "preferGlobal": true,
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ]
+}

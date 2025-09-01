@@ -1,0 +1,32 @@
+name = "frise-chezmehdi-net"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "frise-chezmehdi-net"
+routes = [
+  { pattern = "frise.chezmehdi.net/*", zone_name = "chezmehdi.net" }
+]
+
+[env.staging]
+name = "frise-chezmehdi-net-staging"
+routes = [
+  { pattern = "develop.frise.chezmehdi.net/*", zone_name = "chezmehdi.net" }
+]
+
+# Build configuration
+[build]
+command = "npm run build"
+cwd = "."
+watch_dir = "src"
+
+[build.upload]
+format = "service-worker"
+dir = "dist"
+
+# Environment variables for build
+[vars]
+NODE_ENV = "production"
+
+# Page-specific configuration
+[[pages_build_output_dir]]
+value = "dist"
