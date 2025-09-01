@@ -104,7 +104,7 @@ build:
     - merge_requests
 
 # Build preview for merge requests
-build:preview:
+build_preview:
   stage: build
   script:
     - echo "Building preview for merge request"
@@ -120,7 +120,7 @@ build:preview:
   when: manual
 
 # Deploy to Cloudflare Pages (main branch)
-deploy:production:
+deploy_production:
   stage: deploy
   image: alpine:latest
   before_script:
@@ -150,7 +150,7 @@ deploy:production:
   when: manual
 
 # Deploy preview for develop branch
-deploy:staging:
+deploy_staging:
   stage: deploy
   image: alpine:latest
   before_script:
