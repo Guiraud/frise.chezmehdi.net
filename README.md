@@ -1,6 +1,16 @@
 # Frise Chronologique - ChezMehdi.net
 
-Application de frise chronologique développée avec Vue 3, Vite et TypeScript.
+Application de frise chronologique interactive développée avec Vue 3 et Vite. Créez des timelines dynamiques à partir de Google Sheets, Framacalc ou fichiers CSV.
+
+## ✨ Fonctionnalités
+
+- 📊 **Import de données** : Google Sheets, Framacalc, fichiers CSV locaux
+- 🎯 **Timeline interactive** : Zoom, navigation, sélection d'événements
+- 🔗 **Partage facile** : URLs avec ancres pour événements spécifiques
+- 📱 **Responsive** : Compatible mobile, tablette et desktop
+- 🎨 **Types d'événements** : Événements contextuels/déclencheurs, périodes contextuelles/d'activité
+- 🔍 **Recherche** : Filtrage en temps réel des événements
+- 📋 **Notifications** : Système de messages utilisateur intégré
 
 ## 🚀 Mise en route
 
@@ -8,14 +18,13 @@ Application de frise chronologique développée avec Vue 3, Vite et TypeScript.
 
 - Node.js (version 16 ou supérieure)
 - npm ou yarn
-- Un compte Cloudflare (pour le déploiement)
 
 ### Installation
 
 1. Cloner le dépôt :
 
    ```bash
-   git clone https://github.com/votre-utilisateur/frise.chezmehdi.net.git
+   git clone https://gitlab.com/votre-utilisateur/frise.chezmehdi.net.git
    cd frise.chezmehdi.net
    ```
 
@@ -23,71 +32,119 @@ Application de frise chronologique développée avec Vue 3, Vite et TypeScript.
 
    ```bash
    npm install
-   # ou
-   yarn
    ```
 
 ### Développement local
 
-Pour lancer le serveur de développement :
-
 ```bash
 npm run dev
-# ou
-yarn dev
 ```
 
 Ouvrez [http://localhost:5173](http://localhost:5173) dans votre navigateur.
 
 ### Compilation pour la production
 
-Pour compiler l'application pour la production :
-
 ```bash
 npm run build
-# ou
-yarn build
 ```
 
 Les fichiers compilés seront disponibles dans le dossier `dist`.
 
-## ☁️ Configuration Cloudflare
+## 📋 Format des données
 
-### Déploiement sur Cloudflare Pages
+Vos tableurs doivent contenir ces colonnes :
 
-1. Connectez-vous à votre [tableau de bord Cloudflare](https://dash.cloudflare.com/)
-2. Allez dans Pages > Créer une application
-3. Sélectionnez votre dépôt Git (GitHub/GitLab)
-4. Configurez les paramètres de build :
-   - Framework preset : `Vite`
-   - Build command: `npm run build` ou `yarn build`
-   - Build output directory: `dist`
-   - Variables d'environnement :
-     - `NODE_VERSION`: 16 (ou supérieur)
-     - `VITE_APP_ENV`: production
+| Colonne | Description | Requis |
+|---------|-------------|---------|
+| `type` | Type d'événement (voir ci-dessous) | ✅ |
+| `date_début` | Date de début (YYYY-MM-DD) | ✅ |
+| `titre` | Titre de l'événement | ✅ |
+| `date_fin` | Date de fin (optionnelle pour événements) | ⭕ |
+| `description` | Description HTML de l'événement | ⭕ |
 
-### Configuration DNS
+### Types d'événements supportés
 
-1. Dans votre tableau de bord Cloudflare, allez dans DNS
-2. Ajoutez un enregistrement CNAME pointant vers votre domaine personnalisé (par exemple `frise.chezmehdi.net`)
-3. Si nécessaire, activez le proxy Cloudflare (le nuage orange) pour bénéficier du CDN et de la protection DDoS
+- `événement_contextuel` - Événement ponctuel de contexte (bleu)
+- `événement_déclencheur` - Événement ponctuel déclencheur (rouge)
+- `période_contextuelle` - Période de contexte (vert)
+- `période_activité` - Période d'activité (violet)
 
-### Configuration du domaine personnalisé
+## 💾 Sources de données
 
-1. Dans les paramètres de votre projet Cloudflare Pages
-2. Allez dans l'onglet "Domaines personnalisés"
-3. Ajoutez votre domaine personnalisé (par exemple `frise.chezmehdi.net`)
-4. Suivez les instructions pour vérifier la propriété du domaine
+### Google Sheets
+1. Rendez votre feuille publique
+2. Copiez l'URL complète
+3. Collez dans l'interface
+
+### Framacalc
+1. Publiez votre feuille
+2. Copiez l'URL
+3. Collez dans l'interface
+
+### Fichiers CSV locaux
+1. Placez votre fichier dans le dossier `public/`
+2. Saisissez le nom du fichier (ex: `data.csv`)
+
+## 🔗 Partage et navigation
+
+- **URL avec paramètres** : `?url=lien-vers-tableur`
+- **Ancres événements** : `#event-123` pour navigation directe
+- **Boutons de partage** : Copie automatique des liens
+- **État synchronisé** : L'URL reflète l'état de la timeline
+
+## ☁️ Déploiement
+
+Le projet est configuré pour GitLab CI/CD avec déploiement automatique sur Cloudflare Pages.
+
+### Configuration GitLab CI
+
+Le fichier `.gitlab-ci.yml` contient :
+- **Stage build** : Installation et compilation
+- **Stage deploy** : Déploiement des artifacts
+
+### Variables d'environnement Cloudflare
+
+- Framework preset : `Vite`
+- Build command: `npm run build`
+- Build output directory: `dist`
 
 ## 🛠 Technologies utilisées
 
-- Vue 3 (Composition API)
-- Vite
-- TypeScript
-- Pinia (gestion d'état)
-- Vue Router
-- Tailwind CSS (pour le styling)
+- **Vue 3** (Composition API)
+- **Vite** (bundler et serveur de développement)
+- **vis-timeline** (affichage des timelines interactives)
+- **Vue Router** (navigation)
+- **CSS custom properties** (thématisation)
+
+## 🏗 Architecture
+
+```
+src/
+├── components/
+│   ├── Timeline.vue          # Composant timeline principal
+│   ├── SpreadsheetInput.vue  # Saisie d'URL de tableur
+│   └── HelloWorld.vue        # Composant exemple
+├── services/
+│   └── sheetService.js       # Service import de données
+├── router/
+│   └── index.js             # Configuration des routes
+├── views/
+│   └── Home.vue            # Page d'accueil
+└── App.vue                 # Composant racine
+```
+
+## 🤝 Contribution
+
+1. Fork le projet
+2. Créez votre branche feature (`git checkout -b feature/AmazingFeature`)
+3. Committez vos changements (`git commit -m 'Add AmazingFeature'`)
+4. Push vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrez une Merge Request
 
 ## 📝 Licence
 
-MIT
+MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+---
+
+🌐 **Application en ligne** : https://frise.chezmehdi.net
