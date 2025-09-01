@@ -1,0 +1,6 @@
+type,date_début,date_fin,titre,description
+événement_déclencheur,2025-01-15,,Lancement de la version bêta,Test de l'événement déclencheur
+période_contextuelle,2025-02-01,2025-03-15,Campagne de tests,Période de tests utilisateurs
+événement_contextuel,2025-03-20,,Conférence majeure,Présentation des résultats finaux
+période_activité,2025-04-01,2025-06-30,Amélioration des performances,Phase de développement intensif
+événement_déclencheur,2025-05-10,,Publication de l'étude,Sortie des résultats de recherche

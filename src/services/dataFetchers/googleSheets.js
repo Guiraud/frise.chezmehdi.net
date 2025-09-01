@@ -9,14 +9,23 @@
  */
 export const extractGoogleSheetId = (url) => {
   try {
+    console.log('Extracting ID from URL:', url);
+    
     // Format 1: https://docs.google.com/spreadsheets/d/ID/
     const match1 = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-    if (match1) return match1[1];
+    if (match1) {
+      console.log('Extracted Sheet ID:', match1[1]);
+      return match1[1];
+    }
     
     // Format 2: https://docs.google.com/spreadsheets/d/ID/edit#gid=0
     const match2 = url.match(/[\/&]key=([^&#]+)/);
-    if (match2) return match2[1];
+    if (match2) {
+      console.log('Extracted Sheet ID (key format):', match2[1]);
+      return match2[1];
+    }
     
+    console.log('No valid Google Sheets ID found in URL');
     return null;
   } catch (e) {
     console.error('Error extracting Google Sheets ID:', e);
