@@ -36,8 +36,9 @@ export const fetchSheetData = async (url, options = {}) => {
     const googleSheetId = extractGoogleSheetId(cleanUrl);
     if (googleSheetId) {
       console.log('Detected Google Sheets, ID:', googleSheetId);
-      const rawData = await fetchGoogleSheetData(googleSheetId, options.apiKey);
-      return parseSheetData(rawData);
+      const csvText = await fetchGoogleSheetData(googleSheetId, options.apiKey);
+      const parsedData = parseCSVData(csvText);
+      return parseSheetData([Object.keys(parsedData[0] || {}), ...parsedData.map(Object.values)]);
     }
 
     // Handle Framacalc

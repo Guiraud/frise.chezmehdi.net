@@ -13,7 +13,10 @@ This is a Vue 3 timeline application (Frise Chronologique) that generates intera
 - `npm run preview` - Preview production build
 - `npm install` - Install dependencies
 - `npm run lint` - Run linting (placeholder - needs ESLint setup)
+- `npm run lint:fix` - Fix linting issues (placeholder)
 - `npm run test` - Run tests (placeholder - needs test framework setup)
+- `npm run test:unit` - Run unit tests (placeholder)
+- `npm run type-check` - Type checking (placeholder - needs TypeScript setup)
 
 ## Architecture
 
@@ -78,7 +81,7 @@ Contains working examples using different visualization libraries:
 
 ### File Serving Configuration
 
-Vite is configured to allow serving files from parent directories and handle CSV file requests. The `configureServer` middleware handles root requests with query parameters.
+Vite is configured to allow serving files from parent directories and handle CSV file requests. The `configureServer` middleware handles root requests with query parameters. CORS is enabled in development mode to allow cross-origin requests.
 
 ### Error Handling
 

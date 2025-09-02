@@ -79,11 +79,11 @@ export const parseSheetData = (rows) => {
       item.end = item.start;
     }
     
-    // Determine CSS class based on original type
-    item.className = getEventTypeClass(item.type);
-    
     // Store original type for reference
     item.originalType = originalType;
+    
+    // Determine CSS class based on normalized type (before we overwrite it)
+    item.className = getEventTypeClass(item.type);
     
     // Set vis-timeline type based on whether item has end date
     if (item.date_fin && item.date_fin !== item.date_début) {

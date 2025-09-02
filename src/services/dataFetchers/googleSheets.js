@@ -67,26 +67,8 @@ export const fetchGoogleSheetData = async (sheetId, apiKey = '') => {
     
     performanceMonitor.trackApiCall('google', csvUrl, startTime, endTime, true);
     
-    // Import CSV parser
-    const { parseCSVData } = await import('../parsers/csvParser.js');
-    
-    // Parse CSV text into objects, then convert to array of arrays
-    const parsedObjects = parseCSVData(csvText);
-    
-    if (parsedObjects.length === 0) {
-      console.log('No data found in Google Sheets');
-      return [];
-    }
-    
-    // Convert objects back to array of arrays format expected by timeline parser
-    const headers = Object.keys(parsedObjects[0]);
-    const data = [
-      headers, // Header row
-      ...parsedObjects.map(obj => headers.map(header => obj[header] || ''))
-    ];
-    
-    console.log('Successfully parsed Google Sheets CSV data:', data.length, 'rows');
-    return data;
+    console.log('Successfully fetched Google Sheets CSV data');
+    return csvText;
     
   } catch (error) {
     const endTime = performance.now();
