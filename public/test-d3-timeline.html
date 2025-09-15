@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test D3 Timeline</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .test-data {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border-left: 4px solid #42b983;
+        }
+        .test-result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            background: #e8f5e9;
+            border-left: 4px solid #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test D3.js Timeline</h1>
+        
+        <div class="test-data">
+            <h3>Test Data (your 3 events):</h3>
+            <pre id="test-data">Loading test data...</pre>
+        </div>
+
+        <div id="timeline-container" style="min-height: 400px; border: 2px dashed #ddd; border-radius: 4px; padding: 20px;">
+            <p>D3 Timeline will render here...</p>
+        </div>
+
+        <div id="test-result" class="test-result" style="display: none;">
+            <h3>✅ Timeline Rendering Test Result:</h3>
+            <p id="result-message">Testing...</p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Test data - exactly your 3 events
+        const testData = [
+            {
+                "type": "point",
+                "date_début": "1975-08-30",
+                "titre": "Naissance",
+                "date_fin": "",
+                "description": "Naissance à Dakar",
+                "id": "item-1",
+                "start": "1975-08-30T00:00:00.000Z",
+                "end": "1975-08-30T00:00:00.000Z",
+                "originalType": "événement_déclencheur",
+                "className": "event-trigger",
+                "content": "Naissance",
+                "title": "Naissance\nNaissance à Dakar"
+            },
+            {
+                "type": "point",
+                "date_début": "2025-04-04",
+                "titre": "Mort de George",
+                "date_fin": "",
+                "description": "Mort de George Guiraud à Libourne",
+                "id": "item-2",
+                "start": "2025-04-04T00:00:00.000Z",
+                "end": "2025-04-04T00:00:00.000Z",
+                "originalType": "événement_déclencheur",
+                "className": "event-trigger",
+                "content": "Mort de George",
+                "title": "Mort de George\nMort de George Guiraud à Libourne"
+            },
+            {
+                "type": "range",
+                "date_début": "2001-05-02",
+                "titre": "Début du CLFA",
+                "date_fin": "2008-12-31",
+                "description": "Prise de post",
+                "id": "item-3",
+                "start": "2001-05-02T00:00:00.000Z",
+                "end": "2008-12-31T00:00:00.000Z",
+                "originalType": "période_activité",
+                "className": "period-activity",
+                "content": "Début du CLFA",
+                "title": "Début du CLFA\nPrise de post"
+            }
+        ];
+
+        // Display test data
+        document.getElementById('test-data').textContent = JSON.stringify(testData, null, 2);
+
+        // Simple D3 Timeline Test
+        import('https://d3js.org/d3.v7.min.js').then(() => {
+            console.log('📊 D3.js loaded successfully');
+            renderTestTimeline();
+        }).catch(err => {
+            console.error('❌ D3.js loading failed:', err);
+            showResult('D3.js loading failed: ' + err.message, false);
+        });
+
+        function renderTestTimeline() {
+            try {
+                const container = document.getElementById('timeline-container');
+                container.innerHTML = ''; // Clear
+
+                const width = 800;
+                const height = 300;
+                const margin = { top: 40, right: 40, bottom: 60, left: 40 };
+                const innerWidth = width - margin.left - margin.right;
+                const innerHeight = height - margin.top - margin.bottom;
+
+                // Create SVG
+                const svg = d3.select(container)
+                    .append('svg')
+                    .attr('width', width)
+                    .attr('height', height)
+                    .style('background', 'white')
+                    .style('border-radius', '4px');
+
+                const g = svg.append('g')
+                    .attr('transform', `translate(${margin.left},${margin.top})`);
+
+                // Parse dates
+                const parseTime = d3.timeParse('%Y-%m-%dT%H:%M:%S.%fZ');
+                const processedItems = testData.map(item => ({
+                    ...item,
+                    startDate: parseTime(item.start),
+                    endDate: item.end ? parseTime(item.end) : parseTime(item.start)
+                }));
+
+                console.log('📅 Processed items:', processedItems);
+
+                // Time scale
+                const timeExtent = d3.extent([
+                    ...processedItems.map(d => d.startDate),
+                    ...processedItems.map(d => d.endDate)
+                ]);
+
+                const xScale = d3.scaleTime()
+                    .domain(timeExtent)
+                    .range([0, innerWidth]);
+
+                const yScale = d3.scaleBand()
+                    .domain(processedItems.map((d, i) => i))
+                    .range([0, innerHeight])
+                    .padding(0.3);
+
+                // X axis
+                const xAxis = d3.axisBottom(xScale)
+                    .tickFormat(d3.timeFormat('%Y'))
+                    .ticks(5);
+
+                g.append('g')
+                    .attr('transform', `translate(0,${innerHeight})`)
+                    .call(xAxis);
+
+                // Render items
+                processedItems.forEach((item, i) => {
+                    const itemGroup = g.append('g')
+                        .attr('class', 'timeline-item')
+                        .attr('transform', `translate(0,${yScale(i)})`);
+
+                    if (item.type === 'range' && item.startDate.getTime() !== item.endDate.getTime()) {
+                        // Range bar
+                        const x = xScale(item.startDate);
+                        const barWidth = Math.max(4, xScale(item.endDate) - xScale(item.startDate));
+                        const barHeight = yScale.bandwidth();
+
+                        itemGroup.append('rect')
+                            .attr('x', x)
+                            .attr('y', 0)
+                            .attr('width', barWidth)
+                            .attr('height', barHeight)
+                            .attr('fill', '#9b59b6')
+                            .attr('opacity', 0.8)
+                            .attr('rx', 4);
+
+                        itemGroup.append('text')
+                            .attr('x', x + barWidth / 2)
+                            .attr('y', barHeight / 2)
+                            .attr('dy', '0.35em')
+                            .attr('text-anchor', 'middle')
+                            .style('fill', 'white')
+                            .style('font-weight', 'bold')
+                            .style('font-size', '12px')
+                            .text(item.content);
+                    } else {
+                        // Point
+                        const x = xScale(item.startDate);
+
+                        itemGroup.append('circle')
+                            .attr('cx', x)
+                            .attr('cy', yScale.bandwidth() / 2)
+                            .attr('r', 8)
+                            .attr('fill', '#e74c3c')
+                            .attr('stroke', '#c0392b')
+                            .attr('stroke-width', 3);
+
+                        itemGroup.append('text')
+                            .attr('x', x + 15)
+                            .attr('y', yScale.bandwidth() / 2)
+                            .attr('dy', '0.35em')
+                            .style('font-size', '14px')
+                            .style('font-weight', 'bold')
+                            .text(item.content);
+                    }
+
+                    // Add click handler
+                    itemGroup
+                        .style('cursor', 'pointer')
+                        .on('click', function() {
+                            alert(`Clicked: ${item.content}\nDate: ${item.startDate.toLocaleDateString()}\nDescription: ${item.description}`);
+                        });
+                });
+
+                showResult(`Successfully rendered ${processedItems.length} timeline items with D3.js!`, true);
+
+            } catch (error) {
+                console.error('❌ Timeline rendering error:', error);
+                showResult('Timeline rendering failed: ' + error.message, false);
+            }
+        }
+
+        function showResult(message, success) {
+            const resultDiv = document.getElementById('test-result');
+            const messageEl = document.getElementById('result-message');
+            
+            messageEl.textContent = message;
+            resultDiv.style.display = 'block';
+            resultDiv.style.background = success ? '#e8f5e9' : '#fdeaea';
+            resultDiv.style.borderLeftColor = success ? '#27ae60' : '#e74c3c';
+            
+            console.log(success ? '✅' : '❌', message);
+        }
+    </script>
+</body>
+</html>

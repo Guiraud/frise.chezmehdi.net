@@ -1,0 +1,63 @@
+{
+  "timestamp": "2025-09-02T13:54:49.307Z",
+  "itemsCount": 3,
+  "loading": false,
+  "error": null,
+  "spreadsheetUrl": "https://docs.google.com/spreadsheets/d/1ly0Bx-qXeLtqc6E2kpdGsdMpTL5Vhq0cF6ut89idJ78/edit?usp=sharing",
+  "searchQuery": "",
+  "items": [
+    {
+      "type": "point",
+      "date_début": "1975-08-30",
+      "titre": "Naissance",
+      "date_fin": "",
+      "description": "Naissance à Dakar",
+      "": "",
+      "id": "item-1",
+      "start": "1975-08-30T00:00:00.000Z",
+      "end": "1975-08-30T00:00:00.000Z",
+      "originalType": "événement_déclencheur",
+      "className": "event-trigger",
+      "content": "Naissance",
+      "title": "Naissance\nNaissance à Dakar"
+    },
+    {
+      "type": "point",
+      "date_début": "2025-04-04",
+      "titre": "Mort de George",
+      "date_fin": "",
+      "description": "Mort de George Guiraud à Libourne",
+      "": "",
+      "id": "item-2",
+      "start": "2025-04-04T00:00:00.000Z",
+      "end": "2025-04-04T00:00:00.000Z",
+      "originalType": "événement_déclencheur",
+      "className": "event-trigger",
+      "content": "Mort de George",
+      "title": "Mort de George\nMort de George Guiraud à Libourne"
+    },
+    {
+      "type": "range",
+      "date_début": "2001-05-02",
+      "titre": "Début du CLFA",
+      "date_fin": "2008-12-31",
+      "description": "Prise de post",
+      "": "",
+      "id": "item-3",
+      "start": "2001-05-02T00:00:00.000Z",
+      "end": "2008-12-31T00:00:00.000Z",
+      "originalType": "période_activité",
+      "className": "period-activity",
+      "content": "Début du CLFA",
+      "title": "Début du CLFA\nPrise de post"
+    }
+  ],
+  "validationResults": [
+    {
+      "id": 1756821258769,
+      "message": "Validation complete: 3 valid, 0 invalid",
+      "type": "success",
+      "timestamp": "15:54:18"
+    }
+  ]
+}
