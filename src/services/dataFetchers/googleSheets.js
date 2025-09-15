@@ -11,18 +11,25 @@ export const extractGoogleSheetId = (url) => {
   try {
     console.log('Extracting ID from URL:', url);
     
-    // Format 1: https://docs.google.com/spreadsheets/d/ID/
-    const match1 = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-    if (match1) {
-      console.log('Extracted Sheet ID:', match1[1]);
-      return match1[1];
+    // Format 1: Published sheets - https://docs.google.com/spreadsheets/d/e/LONG_ID/pubhtml
+    const publishedMatch = url.match(/\/spreadsheets\/d\/e\/([a-zA-Z0-9-_]+)/);
+    if (publishedMatch) {
+      console.log('Extracted Published Sheet ID:', publishedMatch[1]);
+      return publishedMatch[1];
     }
     
-    // Format 2: https://docs.google.com/spreadsheets/d/ID/edit#gid=0
-    const match2 = url.match(/[\/&]key=([^&#]+)/);
-    if (match2) {
-      console.log('Extracted Sheet ID (key format):', match2[1]);
-      return match2[1];
+    // Format 2: Regular sheets - https://docs.google.com/spreadsheets/d/ID/
+    const regularMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    if (regularMatch) {
+      console.log('Extracted Regular Sheet ID:', regularMatch[1]);
+      return regularMatch[1];
+    }
+    
+    // Format 3: Key parameter format - https://docs.google.com/spreadsheets/?key=ID
+    const keyMatch = url.match(/[\/&]key=([^&#]+)/);
+    if (keyMatch) {
+      console.log('Extracted Sheet ID (key format):', keyMatch[1]);
+      return keyMatch[1];
     }
     
     console.log('No valid Google Sheets ID found in URL');
@@ -39,10 +46,20 @@ export const extractGoogleSheetId = (url) => {
  * @param {string} apiKey - Google API key (optional, not used with CSV method)
  * @returns {Promise<Array<Array>>} Raw sheet data
  */
-export const fetchGoogleSheetData = async (sheetId, apiKey = '') => {
+export const fetchGoogleSheetData = async (sheetId, apiKey = '', originalUrl = '') => {
   const startTime = performance.now();
-  // Use CSV export URL which works without API key for public sheets
-  const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=0`;
+  
+  // Extract gid parameter from original URL if present
+  const gidMatch = originalUrl.match(/[?&]gid=([^&#]+)/);
+  const gid = gidMatch ? gidMatch[1] : '0';
+  
+  // Determine if this is a published sheet ID (long format starting with 2PACX)
+  const isPublishedSheet = sheetId.startsWith('2PACX-');
+  
+  // Use appropriate CSV export URL format
+  const csvUrl = isPublishedSheet 
+    ? `https://docs.google.com/spreadsheets/d/e/${sheetId}/pub?output=csv&gid=${gid}`
+    : `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
   
   // Import performance monitor dynamically to avoid circular deps
   const { default: performanceMonitor } = await import('../../utils/performanceMonitor.js');

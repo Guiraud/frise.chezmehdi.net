@@ -37,7 +37,7 @@ export const fetchSheetData = async (url, options = {}) => {
     const googleSheetId = extractGoogleSheetId(cleanUrl);
     if (googleSheetId) {
       console.log('Detected Google Sheets, ID:', googleSheetId);
-      const csvText = await fetchGoogleSheetData(googleSheetId, options.apiKey);
+      const csvText = await fetchGoogleSheetData(googleSheetId, options.apiKey, cleanUrl);
       const parsedData = parseCSVData(csvText);
       return parseSheetData([Object.keys(parsedData[0] || {}), ...parsedData.map(Object.values)]);
     }
