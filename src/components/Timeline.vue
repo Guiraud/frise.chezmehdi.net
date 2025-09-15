@@ -30,6 +30,7 @@
 <script>
 import { Timeline } from 'vis-timeline/standalone';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
+import { DataSet } from 'vis-data/esnext';
 
 export default {
   name: 'Timeline',
@@ -49,15 +50,16 @@ export default {
         height: '500px',
         stack: true,
         showMajorLabels: true,
-        showCurrentTime: true,
+        showCurrentTime: false,  // Disable current time line for debugging
         zoomable: true,
         moveable: true,
         orientation: 'top',
         margin: {
           item: {
-            horizontal: 0,
+            horizontal: 10,
             vertical: 10
-          }
+          },
+          axis: 40
         },
         format: {
           minorLabels: {
@@ -68,7 +70,16 @@ export default {
             year: 'YYYY',
             month: 'MMMM YYYY'
           }
-        }
+        },
+        // Force timeline to fit window properly
+        start: new Date(1970, 0, 1),
+        end: new Date(2030, 0, 1),
+        // Ensure items are visible
+        verticalScroll: false,
+        horizontalScroll: true,
+        // CRITICAL: Force immediate rendering
+        autoResize: true,
+        throttleRedraw: 0  // No throttling
       })
     }
   },
@@ -81,8 +92,15 @@ export default {
   watch: {
     items: {
       handler(newItems) {
-        if (this.timeline) {
-          this.timeline.setItems(newItems);
+        if (this.timeline && newItems && newItems.length > 0) {
+          console.log('🔄 Updating timeline with new items:', newItems.length);
+          const newDataSet = new DataSet(newItems);
+          this.timeline.setItems(newDataSet);
+          
+          // Force redraw after update
+          setTimeout(() => {
+            this.timeline.fit();
+          }, 100);
         }
       },
       deep: true
@@ -97,7 +115,29 @@ export default {
     }
   },
   mounted() {
-    this.initTimeline();
+    // Ensure the container has proper dimensions before initializing
+    this.$nextTick(() => {
+      const container = this.$refs.timeline;
+      console.log('📐 Container dimensions before init:', {
+        clientWidth: container.clientWidth,
+        clientHeight: container.clientHeight,
+        offsetWidth: container.offsetWidth,
+        offsetHeight: container.offsetHeight
+      });
+      
+      // Force container dimensions if needed
+      if (container.clientHeight === 0) {
+        console.log('🔧 Fixing container height...');
+        container.style.height = '500px';
+        container.style.width = '100%';
+        container.style.minHeight = '500px';
+      }
+      
+      setTimeout(() => {
+        this.initTimeline();
+      }, 100);
+    });
+    
     window.addEventListener('resize', this.handleResize);
   },
   beforeUnmount() {
@@ -113,58 +153,124 @@ export default {
       console.log('🔍 Timeline items received:', this.items);
       console.log('📊 Items count:', this.items.length);
       
-      // Vérifier le format des items
+      // Enhanced debugging for each item
       if (this.items.length > 0) {
-        console.log('📋 First item structure:', this.items[0]);
-        console.log('📋 Required fields check:', {
-          hasId: !!this.items[0].id,
-          hasStart: !!this.items[0].start,
-          hasContent: !!(this.items[0].content || this.items[0].titre),
-          hasType: !!this.items[0].type
+        this.items.forEach((item, index) => {
+          console.log(`📋 Item ${index + 1}:`, {
+            id: item.id,
+            content: item.content,
+            titre: item.titre,
+            start: item.start,
+            end: item.end,
+            type: item.type,
+            className: item.className,
+            hasValidStart: !!item.start && !isNaN(new Date(item.start).getTime()),
+            hasContent: !!(item.content || item.titre)
+          });
         });
       }
       
-      // Force test data if no items work
-      let testItems = this.items;
-      if (this.items.length > 0 && !this.items.some(item => item.start && item.content)) {
-        console.log('⚠️ Creating fallback test data because items seem malformed');
-        testItems = [
+      // Use real items - remove fallback logic that's interfering
+      let timelineItems = this.items;
+      
+      // Only create test data if we truly have no items at all
+      if (this.items.length === 0) {
+        console.log('⚠️ No items provided, using test data for debugging');
+        timelineItems = [
           {
             id: 'test-1',
             content: 'Test Event 1',
             start: '2024-01-01',
             type: 'point',
             className: 'event-trigger'
-          },
-          {
-            id: 'test-2', 
-            content: 'Test Event 2',
-            start: '2024-06-01',
-            end: '2024-12-01',
-            type: 'range',
-            className: 'period-activity'
           }
         ];
-        console.log('🧪 Using test items:', testItems);
+      } else {
+        console.log('✅ Using real timeline items:', timelineItems.length);
       }
       
       console.log('🏗️ Creating Timeline with options:', this.options);
+      console.log('🏗️ Timeline items to render:', timelineItems);
+      
+      // Create DataSet for better performance and debugging
+      const itemsDataSet = new DataSet(timelineItems);
+      console.log('📊 DataSet created with', itemsDataSet.length, 'items');
       
       this.timeline = new Timeline(
         container,
-        testItems,
+        itemsDataSet,
         this.groups,
         this.options
       );
       
       console.log('📊 Timeline created successfully');
+      
+      // Debug: Check if timeline container has content
+      setTimeout(() => {
+        const timelineElement = this.$refs.timeline;
+        const visTimelineDiv = timelineElement.querySelector('.vis-timeline');
+        const visItems = timelineElement.querySelectorAll('.vis-item');
+        
+        console.log('🔍 Timeline DOM after creation:', {
+          containerExists: !!timelineElement,
+          hasChildren: timelineElement.children.length > 0,
+          innerHTML: timelineElement.innerHTML.length,
+          clientHeight: timelineElement.clientHeight,
+          scrollHeight: timelineElement.scrollHeight,
+          visTimelineExists: !!visTimelineDiv,
+          visItemsCount: visItems.length,
+          containerHTML: timelineElement.innerHTML.substring(0, 200) + '...'
+        });
+        
+        if (visItems.length > 0) {
+          console.log('✅ Vis items found in DOM:', visItems.length);
+          visItems.forEach((item, index) => {
+            console.log(`📋 Vis item ${index}:`, {
+              className: item.className,
+              style: item.style.cssText,
+              visible: item.offsetHeight > 0 && item.offsetWidth > 0,
+              innerHTML: item.innerHTML
+            });
+          });
+        } else {
+          console.log('❌ No vis-items found in DOM - timeline not rendering properly');
+          console.log('🔄 Trying to force visibility...');
+          
+          // Force timeline visibility
+          if (visTimelineDiv) {
+            visTimelineDiv.style.visibility = 'visible';
+            visTimelineDiv.style.opacity = '1';
+            visTimelineDiv.style.display = 'block';
+          }
+          
+          // Remove loading screens
+          const loadingScreens = timelineElement.querySelectorAll('.vis-loading-screen');
+          loadingScreens.forEach(screen => screen.remove());
+        }
+        
+        // Safely force redraw
+        console.log('🔄 Force timeline redraw...');
+        try {
+          this.timeline.redraw();
+          this.timeline.fit();
+        } catch (error) {
+          console.log('⚠️ Timeline operation error (loading screen issue):', error.message);
+          // Timeline will still work, just logging the error
+        }
+      }, 1000);
+
+      // Wait for timeline to be ready before checking DOM
+      this.timeline.on('ready', () => {
+        console.log('📊 Timeline ready event fired');
+        setTimeout(() => this.checkTimelineRendering(), 500);
+      });
 
       // Gestion des événements
       this.timeline.on('select', this.handleSelect);
       this.timeline.on('rangechanged', this.handleRangeChange);
       
       // Force fit to show all items
-      if (testItems.length > 0) {
+      if (timelineItems.length > 0) {
         setTimeout(() => {
           console.log('🎯 Fitting timeline to show all items');
           this.timeline.fit();
@@ -232,6 +338,60 @@ export default {
       if (this.timeline) {
         this.timeline.redraw();
       }
+    },
+
+    checkTimelineRendering() {
+      const timelineElement = this.$refs.timeline;
+      const visTimelineDiv = timelineElement.querySelector('.vis-timeline');
+      const visItems = timelineElement.querySelectorAll('.vis-item');
+      
+      console.log('🔍 Final timeline check:', {
+        visTimelineExists: !!visTimelineDiv,
+        visItemsCount: visItems.length,
+        timelineVisible: visTimelineDiv?.style.visibility !== 'hidden'
+      });
+
+      if (visItems.length === 0) {
+        console.log('⚡ Applying aggressive timeline fixes...');
+        
+        // Force show timeline
+        if (visTimelineDiv) {
+          visTimelineDiv.style.visibility = 'visible !important';
+          visTimelineDiv.style.opacity = '1 !important';
+          visTimelineDiv.style.display = 'block !important';
+        }
+        
+        // Safely remove loading screens that are still in DOM
+        const loadingScreens = timelineElement.querySelectorAll('.vis-loading-screen');
+        loadingScreens.forEach(screen => {
+          if (screen.parentNode) {
+            console.log('🗑️ Safely removing loading screen');
+            screen.parentNode.removeChild(screen);
+          }
+        });
+        
+        // Safely force timeline refresh
+        try {
+          this.timeline.redraw();
+          this.timeline.fit();
+        } catch (error) {
+          console.log('⚠️ Timeline redraw error (expected):', error.message);
+        }
+        
+        // One more check after 1 second
+        setTimeout(() => {
+          const finalItems = timelineElement.querySelectorAll('.vis-item');
+          console.log('🏁 Final check - vis items found:', finalItems.length);
+          
+          if (finalItems.length === 0) {
+            console.error('🚨 Timeline failed to render items completely');
+          } else {
+            console.log('✅ Timeline finally rendered successfully!');
+          }
+        }, 1000);
+      } else {
+        console.log('✅ Timeline rendered successfully with', visItems.length, 'items');
+      }
     }
   }
 };
@@ -243,13 +403,22 @@ export default {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  overflow: visible;  /* Changed from hidden to allow timeline to render */
+  position: relative;
+  z-index: 1;
 }
 
 .timeline-vis {
-  width: 100%;
-  min-height: 500px;
+  width: 100% !important;
+  min-height: 500px !important;
+  height: 500px !important;
   border-bottom: 1px solid #eee;
+  background-color: #fff !important;
+  overflow: visible !important;
+  position: relative !important;
+  /* Force layout */
+  display: block !important;
+  box-sizing: border-box !important;
 }
 
 .timeline-details {
@@ -318,6 +487,49 @@ export default {
   background: rgba(66, 185, 131, 0.1);
 }
 
+/* AGGRESSIVE: Force vis-timeline container visibility and layout */
+:deep(.vis-timeline) {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 500px !important;
+  position: relative !important;
+  background: white !important;
+}
+
+/* CRITICAL: Override any hidden states */
+:deep(.vis-timeline[style*="visibility: hidden"]) {
+  visibility: visible !important;
+}
+
+:deep(.vis-timeline[style*="display: none"]) {
+  display: block !important;
+}
+
+/* Don't hide loading screens with CSS - let vis-timeline handle them properly */
+
+:deep(.vis-panel) {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+}
+
+:deep(.vis-panel.vis-center) {
+  background: white !important;
+}
+
+:deep(.vis-panel.vis-bottom) {
+  background: white !important;
+  height: auto !important;
+}
+
+/* Ensure axis is visible */
+:deep(.vis-time-axis) {
+  background: #f8f9fa !important;
+  border-top: 1px solid #e9ecef !important;
+}
+
 /* Styles spécifiques pour la timeline */
 :deep(.vis-item) {
   border-radius: 4px;
@@ -325,6 +537,7 @@ export default {
   font-size: 0.9em;
   color: white;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  visibility: visible !important;
 }
 
 :deep(.vis-item.vis-box) {

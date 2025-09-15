@@ -141,7 +141,7 @@ export default {
       errorInfo.value = {
         message: error.message,
         stack: error.stack,
-        componentInfo: String(errorInfo)
+        componentInfo: String(instance)
       };
       
       // Emit error for parent handling

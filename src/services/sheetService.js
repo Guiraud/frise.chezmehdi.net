@@ -15,7 +15,8 @@ import { parseSheetData } from './parsers/timelineParser.js';
  * @returns {Promise<Array<Object>>} Timeline-formatted data
  */
 export const fetchSheetData = async (url, options = {}) => {
-  console.log('fetchSheetData called with URL:', url);
+  console.log('🚀 NEW sheetService.js fetchSheetData called with URL:', url);
+  console.log('🔧 Using CSV export method (no API key required)');
   
   try {
     if (!url) {

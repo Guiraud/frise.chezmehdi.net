@@ -21,6 +21,8 @@ export const parseSheetData = (rows) => {
     throw new Error(`Missing required columns: ${missingColumns.join(', ')}`);
   }
   
+  console.log('📊 Processing', rows.length - 1, 'data rows...');
+  
   // Process data rows
   return rows.slice(1).map((row, index) => {
     const item = {};

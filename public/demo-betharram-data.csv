@@ -1,0 +1,30 @@
+type,date_début,titre,date_fin,description
+événement_déclencheur,1995-01-31,La gifle fatale,,La gifle de janvier 1995 qui a fait perdre définitivement 40% de ses capacités auditives à l'élève
+événement_contextuel,1995-12-05,Le péron provoqué par un encadrant-élève,,Le péron
+événement_déclencheur,1996-01-29,Plainte pour violences,,Dépôt d'une plainte par le père d'un élève pensionnaire pour violences volontaires et traitements inhumains
+événement_déclencheur,1996-04-10,Révélation publique de l'affaire,,Publication en Une de l'article révélant l'affaire publiquement
+événement_contextuel,1996-04-11,Nouveaux témoignages - Bayrou ne s'exprime pas,,Nouveaux témoignages et révélations sur les violences à Bétharram
+événement_contextuel,1996-04-12,Vague de soutien pour Bétharram,,Publication de l'article sur la vague de soutien en faveur de l'institution
+événement_contextuel,1996-04-13,Réaction de la direction,,Réaction officielle de la direction du collège aux accusations
+événement_déclencheur,1996-06-12,Condamnation du surveillant,,Condamnation du surveillant auteur de la gifle à une amende de 5000 francs avec sursis
+événement_déclencheur,1998-05-26,Mise en examen du père Carricart,,Mise en examen et incarcération du père Pierre Carricart pour viol
+événement_contextuel,1998-05-29,Publication de l'affaire Carricart,,Publication en Une de l'arrestation du père Carricart
+événement_contextuel,1998-05-30,Stupeur à Bétharram,,Article sur la stupeur à Bétharram suite à l'affaire Carricart
+événement_contextuel,1998-06-06,Demande de remise en liberté,,Dépôt d'une demande de remise en liberté par la défense
+événement_déclencheur,1998-06-10,Remise en liberté sous contrôle,,Remise en liberté du père Carricart sous contrôle judiciaire
+événement_déclencheur,1999-07-06,Confrontation judiciaire,,Confrontation de trois heures entre le père Carricart et son accusateur
+événement_déclencheur,1999-07-15,Départ pour Rome,,Levée partielle du contrôle judiciaire et départ pour Rome
+événement_déclencheur,2000-01-14,Disparition du père Carricart,,Disparition du père Pierre Carricart à Rome
+événement_déclencheur,2000-02-04,Découverte du corps dans le Tibre,,Découverte du corps du père Carricart dans les eaux du Tibre à Rome
+événement_contextuel,2000-02-10,Obsèques du père Carricart,,Obsèques du père Carricart célébrées au Calvaire de Bétharram
+événement_contextuel,2000-07-18,Courrier d'Alain Esquerre,,Publication du courrier d'un ancien élève exprimant sa solidarité aux victimes
+événement_contextuel,2000-10-06,Annonce de l'exhumation,,Annonce de l'exhumation possible du corps pour prélèvements ADN
+événement_déclencheur,2000-11-10,Exhumation du corps,,Exhumation du corps du père Carricart à partir de 8h30
+événement_déclencheur,2000-12-02,Confirmation ADN,,Confirmation par analyses ADN que le corps enterré est bien celui de Pierre Carricart
+événement_déclencheur,2001-03-30,Non-lieu prononcé,,Prononcé du non-lieu par le juge suite au décès confirmé
+période_activité,1996-04-10,Couverture affaire de la gifle,1996-06-12,Période de couverture médiatique intensive de l'affaire de la gifle par La République des Pyrénées
+période_activité,1998-05-26,Couverture affaire Carricart,2001-03-30,Période de traitement médiatique de l'affaire Carricart par La République des Pyrénées
+période_contextuelle,1996-01-29,Procédure judiciaire - gifle,1996-06-12,Période d'enquête et procédure judiciaire concernant l'affaire de la gifle
+période_contextuelle,1998-05-26,Procédure judiciaire - Carricart,2001-03-30,Période d'enquête judiciaire sur l'affaire Carricart
+période_contextuelle,1998-06-10,Contrôle judiciaire de Carricart,2000-01-14,Période de liberté sous contrôle judiciaire du père Carricart avant sa fuite
+période_contextuelle,2000-02-04,Vérifications post-mortem,2001-03-30,Période de vérifications post-mortem : de la découverte du corps aux analyses ADN et au non-lieu

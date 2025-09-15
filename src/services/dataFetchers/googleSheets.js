@@ -56,13 +56,21 @@ export const fetchGoogleSheetData = async (sheetId, apiKey = '') => {
       performanceMonitor.trackApiCall('google', csvUrl, startTime, endTime, false, `HTTP Error: ${response.status}`);
       
       if (response.status === 403) {
-        throw new Error('Unable to access Google Sheets. Make sure the document is shared publicly with "Anyone with the link" can view.');
+        throw new Error('❌ Google Sheets access denied. The document must be shared publicly.\n\n📋 Follow these steps:\n1. Open your Google Sheet\n2. Click "Share" (top right)\n3. Change access to "Anyone with the link"\n4. Set permission to "Viewer"\n5. Try again');
       }
       
-      throw new Error(`HTTP Error: ${response.status}`);
+      throw new Error(`❌ Cannot access Google Sheets (HTTP ${response.status}). Make sure the document is shared publicly.`);
+    }
+
+    const csvText = await response.text();
+    
+    // Check if we got HTML instead of CSV (redirect or login page)
+    if (csvText.trim().toLowerCase().startsWith('<html') || csvText.includes('Temporary Redirect')) {
+      const endTime = performance.now();
+      performanceMonitor.trackApiCall('google', csvUrl, startTime, endTime, false, 'HTML Response (Not Public)');
+      throw new Error('❌ Google Sheet is not publicly accessible.\n\n📋 To fix this:\n1. Open your Google Sheet\n2. Click "Share" button (top right)\n3. Change "Restricted" to "Anyone with the link"\n4. Set permission to "Viewer"\n5. Try again with the same URL');
     }
     
-    const csvText = await response.text();
     const endTime = performance.now();
     
     performanceMonitor.trackApiCall('google', csvUrl, startTime, endTime, true);

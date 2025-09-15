@@ -43,8 +43,8 @@ export function useTimeline() {
   };
 
   return {
-    // State
-    timelineData: filteredData,
+    // State - use raw data for timeline component to avoid readonly computed issues
+    timelineData: computed(() => filterTimelineData(timelineData.value, searchQuery.value)),
     rawTimelineData: timelineData,
     loading,
     error,
@@ -52,6 +52,9 @@ export function useTimeline() {
     
     // Actions
     loadTimelineData,
-    clearTimeline
+    clearTimeline,
+    
+    // Add method to get filtered data without reactivity issues
+    getFilteredData: () => filterTimelineData(timelineData.value, searchQuery.value)
   };
 }

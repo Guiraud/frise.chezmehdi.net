@@ -44,13 +44,19 @@ export default defineConfig({
       }
     }
   },
-  // Custom middleware to handle the URL parameter
+  // Custom middleware to handle the URL parameter and static files
   configureServer(server) {
     server.middlewares.use((req, res, next) => {
       const url = new URL(req.url, 'http://localhost')
       
+      // Allow CSV files to be served properly
+      if (url.pathname.endsWith('.csv')) {
+        res.setHeader('Content-Type', 'text/csv')
+        res.setHeader('Access-Control-Allow-Origin', '*')
+      }
+      
       // Allow requests to the root path with any query parameters
-      if (url.pathname === '/' || url.pathname.endsWith('.csv')) {
+      if (url.pathname === '/' || url.pathname.endsWith('.csv') || url.pathname.startsWith('/assets/')) {
         return next()
       }
       

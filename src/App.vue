@@ -2,9 +2,10 @@
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import SpreadsheetInput from './components/SpreadsheetInput.vue';
-import Timeline from './components/Timeline.vue';
+import TimelineComparison from './components/TimelineComparison.vue';
 import ErrorBoundary from './components/ErrorBoundary.vue';
 import DevTools from './components/DevTools.vue';
+import TimelineDebugger from './components/TimelineDebugger.vue';
 import { useTimeline } from './composables/useTimeline';
 import { useUrlState } from './composables/useUrlState';
 import { useNotifications } from './composables/useNotifications';
@@ -13,9 +14,10 @@ export default {
   name: 'App',
   components: {
     SpreadsheetInput,
-    Timeline,
+    TimelineComparison,
     ErrorBoundary,
-    DevTools
+    DevTools,
+    TimelineDebugger
   },
   setup() {
     // Composables
@@ -50,10 +52,7 @@ export default {
       }
     };
     
-    // Gestion du changement de plage de dates
-    const handleRangeChange = (range) => {
-      urlState.updateUrlWithDateRange(range);
-    };
+    // D3Timeline doesn't need range change handling (simpler architecture)
     
     // Copie du lien de partage
     const copyShareLink = () => {
@@ -126,12 +125,51 @@ export default {
       
       notifications.showSuccess('Retour à l\'accueil');
     };
+
+    // Debugger methods
+    const reloadCurrentData = () => {
+      const currentUrl = urlState.spreadsheetUrl.value;
+      if (currentUrl) {
+        enhancedHandleUrlSubmit(currentUrl);
+      }
+    };
+
+    const testTimelineRender = () => {
+      console.log('🧪 Testing timeline render with current data:', {
+        itemCount: timeline.timelineData.value.length,
+        items: timeline.timelineData.value
+      });
+      notifications.showInfo('Timeline render test completed - check console');
+    };
     
+    // Load demo data function
+    const loadDemoData = async () => {
+      try {
+        await handleUrlSubmit('demo-timeline-data.csv');
+        notifications.showInfo('Données de démonstration chargées. Testez avec votre propre Google Sheets !');
+      } catch (err) {
+        console.error('Failed to load demo data:', err);
+      }
+    };
+
+    // Load Bétharram demo data function
+    const loadBetharramDemo = async () => {
+      try {
+        await handleUrlSubmit('demo-betharram-data.csv');
+        notifications.showInfo('Données Bétharram chargées - Exemple d\'affaire judiciaire avec chronologie complexe');
+      } catch (err) {
+        console.error('Failed to load Bétharram demo data:', err);
+      }
+    };
+
     // Chargement initial
     onMounted(() => {
       const initialUrl = urlState.loadFromUrl();
       if (initialUrl) {
         enhancedHandleUrlSubmit(initialUrl);
+      } else {
+        // Load demo data to show the timeline interface immediately
+        loadDemoData();
       }
     });
     
@@ -157,7 +195,6 @@ export default {
       // Methods
       handleUrlSubmit: enhancedHandleUrlSubmit,
       handleItemSelect,
-      handleRangeChange,
       copyShareLink,
       
       // Error boundary methods
@@ -173,7 +210,17 @@ export default {
       handleTestCompleted: (result) => {
         console.log('✅ Test completed:', result);
         notifications.showSuccess(`Test completed: ${result.type}`);
-      }
+      },
+
+      // Debugger methods
+      reloadCurrentData,
+      testTimelineRender,
+      
+      // Add missing methods for debugging
+      showHelp: () => console.log('Help functionality coming soon'),
+      showAbout: () => console.log('About functionality coming soon'),
+      loadDemoData,
+      loadBetharramDemo
     };
   }
 };
@@ -223,35 +270,12 @@ export default {
             </div>
           </div>
 
-          <!-- Timeline with its own error boundary -->
-          <ErrorBoundary fallback-message="Erreur lors de l'affichage de la timeline">
-            <Timeline 
-              :items="timelineData"
-              @select="handleItemSelect"
-              @rangechanged="handleRangeChange"
-              class="timeline-card timeline-prominent"
-            />
-          </ErrorBoundary>
-          
-          <!-- Légende -->
-          <div class="legend">
-            <div class="legend-item">
-              <span class="legend-color event-context"></span>
-              <span>Événement contextuel</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-color event-trigger"></span>
-              <span>Événement déclencheur</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-color period-context"></span>
-              <span>Période contextuelle</span>
-            </div>
-            <div class="legend-item">
-              <span class="legend-color period-activity"></span>
-              <span>Période d'activité</span>
-            </div>
-          </div>
+          <!-- Timeline Comparison -->
+          <TimelineComparison 
+            :items="timelineData"
+            @select="handleItemSelect"
+            class="timeline-card timeline-prominent"
+          />
         </div>
       </div>
 
@@ -265,10 +289,20 @@ export default {
               @submit="handleUrlSubmit" 
             />
             
-            <div v-if="spreadsheetUrl" class="share-section">
-              <button @click="copyShareLink" class="btn btn-outline">
-                <i class="icon-link"></i> Copier le lien de partage
-              </button>
+            <div class="action-buttons">
+              <div v-if="spreadsheetUrl" class="share-section">
+                <button @click="copyShareLink" class="btn btn-outline">
+                  <i class="icon-link"></i> Copier le lien de partage
+                </button>
+              </div>
+              <div class="demo-section">
+                <button @click="loadDemoData" class="btn btn-demo">
+                  🎨 Démonstration simple
+                </button>
+                <button @click="loadBetharramDemo" class="btn btn-demo btn-betharram">
+                  ⚖️ Exemple Bétharram (Cas complexe)
+                </button>
+              </div>
             </div>
           </div>
 
@@ -281,7 +315,20 @@ export default {
           <!-- Message d'erreur -->
           <div v-else-if="error" class="error-message">
             <i class="icon-error"></i>
-            <p>{{ error }}</p>
+            <div class="error-content">
+              <div class="error-text">{{ error }}</div>
+              <div v-if="error.includes('Google Sheet')" class="error-help">
+                <h4>💡 Solution rapide:</h4>
+                <p>Votre Google Sheet doit être <strong>public</strong> pour fonctionner:</p>
+                <ol>
+                  <li>Ouvrez votre Google Sheet</li>
+                  <li>Cliquez sur <strong>"Partager"</strong> (bouton bleu)</li>
+                  <li>Changez <strong>"Accès restreint"</strong> → <strong>"Tous les utilisateurs avec le lien"</strong></li>
+                  <li>Définissez l'autorisation sur <strong>"Lecteur"</strong></li>
+                  <li>Cliquez sur <strong>"Terminé"</strong> et réessayez</li>
+                </ol>
+              </div>
+            </div>
           </div>
 
           <!-- Instructions pliables -->
@@ -475,6 +522,17 @@ export default {
       @error-simulated="handleSimulatedError"
       @test-completed="handleTestCompleted"
     />
+    
+    <!-- Timeline Debugger (only in debug mode) -->
+    <TimelineDebugger
+      :items="timelineData"
+      :loading="loading"
+      :error="error"
+      :spreadsheet-url="spreadsheetUrl"
+      :search-query="searchQuery"
+      @reload-data="reloadCurrentData"
+      @test-render="testTimelineRender"
+    />
   </div>
 </template>
 
@@ -643,11 +701,45 @@ body {
   font-weight: var(--font-weight-bold);
 }
 
-/* Section de partage */
-.share-section {
+/* Action buttons section */
+.action-buttons {
   margin-top: var(--spacing-md);
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.share-section {
+  display: flex;
+}
+
+.demo-section {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.btn-demo {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  font-size: 0.9rem;
+}
+
+.btn-demo:hover {
+  background: linear-gradient(135deg, #5a6fd8, #6c42a0);
+  transform: translateY(-1px);
+}
+
+.btn-betharram {
+  background: linear-gradient(135deg, #c0392b, #8e44ad);
+  font-weight: 600;
+}
+
+.btn-betharram:hover {
+  background: linear-gradient(135deg, #a93226, #7d3c98);
 }
 
 /* Section format du tableur */
@@ -925,12 +1017,54 @@ body {
   margin: var(--spacing-md) 0;
   border-left: 4px solid var(--error-color);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--spacing-sm);
 }
 
 .error-message i {
   font-size: 1.2em;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.error-content {
+  flex: 1;
+}
+
+.error-text {
+  font-weight: 500;
+  margin-bottom: var(--spacing-md);
+  white-space: pre-line;
+}
+
+.error-help {
+  background: rgba(255, 255, 255, 0.7);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+}
+
+.error-help h4 {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: 1rem;
+  color: var(--text-color);
+}
+
+.error-help p {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--text-color);
+  font-weight: normal;
+}
+
+.error-help ol {
+  margin: 0;
+  padding-left: var(--spacing-lg);
+  color: var(--text-color);
+}
+
+.error-help li {
+  margin-bottom: var(--spacing-xs);
+  line-height: 1.5;
 }
 
 /* Timeline en tête de page */
@@ -1025,28 +1159,50 @@ body {
   font-weight: var(--font-weight-bold);
 }
 
-/* Légende */
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-md);
-  padding: var(--spacing-sm) 0;
+/* D3 Timeline Legend */
+.timeline-legend {
+  background: white;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow);
+  margin-top: var(--spacing-lg);
+}
+
+.timeline-legend h4 {
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--text-color);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+.legend-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-sm);
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: var(--text-color);
+  padding: var(--spacing-xs);
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition);
+}
+
+.legend-item:hover {
+  background-color: var(--primary-light);
 }
 
 .legend-color {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  border-radius: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Styles pour les différents types d'événements */
