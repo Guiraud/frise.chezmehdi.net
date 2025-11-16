@@ -95,9 +95,9 @@ export default {
       const container = this.$refs.timeline
       const containerRect = container.getBoundingClientRect()
       
-      // Timeline dimensions
+      // Timeline dimensions - augmenté pour meilleure lisibilité
       const width = Math.max(800, containerRect.width || 800)
-      const height = 400
+      const height = 700 // Augmenté de 400px à 700px
       const innerWidth = width - this.margin.left - this.margin.right
       const innerHeight = height - this.margin.top - this.margin.bottom
 
@@ -167,11 +167,11 @@ export default {
         .domain(timeExtent)
         .range([0, innerWidth])
 
-      // Y scale for vertical positioning
+      // Y scale for vertical positioning - augmenté padding pour éviter superpositions
       this.yScale = d3.scaleBand()
         .domain(processedItems.map((d, i) => i))
         .range([0, innerHeight])
-        .padding(0.2)
+        .padding(0.4) // Augmenté de 0.2 à 0.4 pour plus d'espace entre items
 
       // Create time axis
       const xAxis = d3.axisBottom(this.xScale)
@@ -232,7 +232,7 @@ export default {
             .attr('stroke-width', 2)
             .attr('marker-end', 'url(#arrow-end)')
 
-          // Add label for ranges
+          // Add label for ranges - taille de police augmentée
           itemGroup.append('text')
             .attr('x', x + width / 2)
             .attr('y', height / 2)
@@ -240,7 +240,7 @@ export default {
             .attr('text-anchor', 'middle')
             .attr('class', 'timeline-label')
             .style('pointer-events', 'none')
-            .style('font-size', '12px')
+            .style('font-size', '14px') // Augmenté de 12px à 14px
             .style('fill', 'white')
             .style('font-weight', 'bold')
             .text(item.content.length > 20 ? item.content.substring(0, 20) + '...' : item.content)
@@ -258,14 +258,14 @@ export default {
             .attr('class', `timeline-point ${item.className}`)
             .style('cursor', 'pointer')
 
-          // Point label
+          // Point label - taille de police augmentée
           itemGroup.append('text')
             .attr('x', x + 15)
             .attr('y', this.yScale.bandwidth() / 2)
             .attr('dy', '0.35em')
             .attr('class', 'timeline-label')
             .style('pointer-events', 'none')
-            .style('font-size', '14px')
+            .style('font-size', '15px') // Augmenté de 14px à 15px
             .style('font-weight', 'bold')
             .text(item.content)
         }
@@ -362,7 +362,7 @@ export default {
 }
 
 .d3-timeline {
-  min-height: 400px;
+  min-height: 700px; /* Augmenté de 400px à 700px */
   padding: 2rem;
   overflow-x: auto;
 }

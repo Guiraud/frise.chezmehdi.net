@@ -29,7 +29,33 @@
           </div>
         </div>
       </div>
-      
+
+      <!-- Contrôles de navigation -->
+      <div class="timeline-controls">
+        <div class="controls-group">
+          <button @click="zoomIn" class="control-btn" title="Zoom avant (ou Ctrl + Molette)">
+            🔍 +
+          </button>
+          <button @click="zoomOut" class="control-btn" title="Zoom arrière (ou Ctrl + Molette)">
+            🔍 −
+          </button>
+          <button @click="fitTimeline" class="control-btn" title="Ajuster à la vue">
+            ⤢ Tout voir
+          </button>
+        </div>
+        <div class="controls-group">
+          <button @click="moveLeft" class="control-btn" title="Déplacer à gauche (ou glisser)">
+            ←
+          </button>
+          <button @click="moveRight" class="control-btn" title="Déplacer à droite (ou glisser)">
+            →
+          </button>
+        </div>
+        <div class="controls-info">
+          <small>💡 Glissez pour naviguer • Ctrl+Molette pour zoomer</small>
+        </div>
+      </div>
+
       <div ref="timelineContainer" class="timeline-container"></div>
     </div>
 
@@ -137,19 +163,30 @@ export default {
         
         const options = {
           width: '100%',
-          height: '500px',
+          height: '700px', // Augmenté de 500px à 700px pour plus de hauteur
           margin: {
             item: {
-              horizontal: 10,
-              vertical: 10
-            }
+              horizontal: 15, // Augmenté de 10 à 15px
+              vertical: 25    // Augmenté de 10 à 25px pour éviter les superpositions
+            },
+            axis: 5
           },
           orientation: 'both',
-          stack: false, // Permet l'empilement automatique dans les groupes
+          stack: true, // Activé pour éviter les superpositions d'étiquettes
+          stackSubgroups: true,
           zoomable: true,
           moveable: true,
           showCurrentTime: false,
           groupOrder: 'order', // Ordre des groupes
+          // Options de zoom améliorées
+          zoomMin: 1000 * 60 * 60 * 24 * 30, // Zoom minimum: 30 jours
+          zoomMax: 1000 * 60 * 60 * 24 * 365 * 100, // Zoom maximum: 100 ans
+          zoomKey: 'ctrlKey', // Zoom avec Ctrl + scroll
+          horizontalScroll: true,
+          verticalScroll: true,
+          // Options de hauteur des items
+          maxHeight: '700px',
+          minHeight: '700px',
           format: {
             minorLabels: {
               millisecond: 'SSS',
@@ -364,6 +401,49 @@ export default {
       }
     },
 
+    // Méthodes de contrôle de navigation
+    zoomIn() {
+      if (this.timeline) {
+        this.timeline.zoomIn(0.2)
+      }
+    },
+
+    zoomOut() {
+      if (this.timeline) {
+        this.timeline.zoomOut(0.2)
+      }
+    },
+
+    fitTimeline() {
+      if (this.timeline) {
+        this.timeline.fit({ animation: { duration: 500, easingFunction: 'easeInOutQuad' } })
+      }
+    },
+
+    moveLeft() {
+      if (this.timeline) {
+        const range = this.timeline.getWindow()
+        const interval = range.end - range.start
+        this.timeline.setWindow(
+          new Date(range.start.getTime() - interval * 0.2),
+          new Date(range.end.getTime() - interval * 0.2),
+          { animation: { duration: 300, easingFunction: 'easeInOutQuad' } }
+        )
+      }
+    },
+
+    moveRight() {
+      if (this.timeline) {
+        const range = this.timeline.getWindow()
+        const interval = range.end - range.start
+        this.timeline.setWindow(
+          new Date(range.start.getTime() + interval * 0.2),
+          new Date(range.end.getTime() + interval * 0.2),
+          { animation: { duration: 300, easingFunction: 'easeInOutQuad' } }
+        )
+      }
+    },
+
     formatDate(dateString) {
       const date = new Date(dateString)
       return date.toLocaleDateString('fr-FR', {
@@ -479,10 +559,68 @@ export default {
 
 .timeline-container {
   width: 100%;
-  height: 500px;
+  height: 700px; /* Augmenté de 500px à 700px */
   border: 2px solid #f8f9fa;
   border-radius: 8px;
   background: white;
+}
+
+.timeline-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.controls-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.control-btn {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  color: #495057;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.control-btn:hover {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.control-btn:active {
+  transform: translateY(0);
+}
+
+.controls-info {
+  color: #666;
+  font-style: italic;
+  flex: 1;
+  text-align: right;
+  min-width: 200px;
+}
+
+.controls-info small {
+  font-size: 0.85rem;
 }
 
 .timeline-fallback {
@@ -712,10 +850,27 @@ export default {
 
 :deep(.vis-item) {
   border-radius: 4px !important;
-  font-size: 0.85rem;
+  font-size: 0.9rem; /* Augmenté de 0.85rem à 0.9rem */
   font-weight: 500;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-height: 30px !important; /* Hauteur minimale pour une meilleure lisibilité */
+  padding: 5px 10px !important; /* Padding pour plus d'espace */
+}
+
+:deep(.vis-item.vis-range) {
+  min-height: 35px !important; /* Hauteur minimale pour les périodes */
+}
+
+:deep(.vis-item.vis-point) {
+  min-height: 28px !important; /* Hauteur minimale pour les événements ponctuels */
+}
+
+:deep(.vis-item .vis-item-content) {
+  padding: 4px 8px !important;
+  line-height: 1.4 !important;
+  white-space: normal !important; /* Permet le retour à la ligne si nécessaire */
+  overflow: visible !important;
 }
 
 :deep(.vis-item:hover) {
@@ -758,9 +913,23 @@ export default {
   .vis-timeline {
     padding: 1rem;
   }
-  
+
   .timeline-container {
-    height: 400px;
+    height: 600px; /* Augmenté de 400px à 600px pour mobile */
+  }
+
+  .timeline-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .controls-group {
+    justify-content: center;
+  }
+
+  .controls-info {
+    text-align: center;
+    min-width: auto;
   }
   
   .legend {
