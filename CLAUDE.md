@@ -29,9 +29,10 @@ This is a Vue 3 timeline application (Frise Chronologique) that generates intera
 ### Key Technologies
 
 - **Vue 3** with Composition API
-- **vis-timeline** for timeline visualization
+- **vis-timeline** for timeline visualization (primary)
 - **vis-data** for data handling
 - **Vite** as build tool and dev server
+- **Alternative visualization libraries**: ApexCharts, Chart.js, D3.js, Apache ECharts (examples available)
 
 ### Data Flow
 
@@ -73,8 +74,9 @@ This is a Vue 3 timeline application (Frise Chronologique) that generates intera
 
 Contains working examples using different visualization libraries:
 - `Examples/apexcharts/` - ApexCharts implementation
-- `Examples/chartjs/` - Chart.js implementation  
+- `Examples/chartjs/` - Chart.js implementation
 - `Examples/d3js/` - D3.js implementation
+- `Examples/echarts/` - Apache ECharts implementation
 - `Examples/pyrennees/` - Sample timeline data (Bétharram case study)
 
 ## Development Notes

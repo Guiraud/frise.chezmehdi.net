@@ -208,8 +208,12 @@ export default {
               day: 'MMMM YYYY',
               week: 'MMMM YYYY',
               month: 'YYYY',
-              year: ''
+              year: 'YYYY'
             }
+          },
+          timeAxis: {
+            scale: 'year',
+            step: 10
           },
           locale: 'fr',
           tooltip: {
